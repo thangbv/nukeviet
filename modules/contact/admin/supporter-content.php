@@ -2,12 +2,13 @@
 
 /**
  * @Project NUKEVIET 4.x
- * @Author VINADES.,JSC (contact@vinades.vn)
+ * @Author VINADES.,JSC <contact@vinades.vn>
  * @Copyright (C) 2017 VINADES.,JSC. All rights reserved
  * @License GNU/GPL version 2 or any later version
  * @Createdate Sun, 08 Jan 2017 01:38:17 GMT
  */
-if (! defined('NV_IS_FILE_ADMIN'))
+
+if (!defined('NV_IS_FILE_ADMIN'))
     die('Stop!!!');
 
 $row = array();
@@ -19,8 +20,7 @@ if ($row['id'] > 0) {
     $lang_module['supporter_add'] = $lang_module['supporter_edit'];
     $row = $db->query('SELECT * FROM ' . NV_PREFIXLANG . '_' . $module_data . '_supporter WHERE id=' . $row['id'])->fetch();
     if (empty($row)) {
-        Header('Location: ' . NV_BASE_ADMINURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $module_name . '&' . NV_OP_VARIABLE . '=' . $op);
-        die();
+        nv_redirect_location(NV_BASE_ADMINURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $module_name . '&' . NV_OP_VARIABLE . '=' . $op);
     }
 } else {
     $row['id'] = 0;
@@ -44,31 +44,33 @@ if ($nv_Request->isset_request('submit', 'post')) {
     $row['phone'] = $nv_Request->get_title('phone', 'post', '');
     $row['email'] = $nv_Request->get_title('email', 'post', '');
     $row['others'] = $nv_Request->get_array('others', 'post', '');
-    
-    if (! empty($row['others'])) {
+
+    if (!empty($row['others'])) {
         foreach ($row['others'] as $index => $value) {
             if (empty($value['name']) or empty($value['value'])) {
                 unset($row['others'][$index]);
             }
         }
         $row['others'] = serialize($row['others']);
+    } else {
+        $row['others'] = '';
     }
-    
+
     if (empty($row['departmentid'])) {
         $error[] = $lang_module['error_required_departmentid'];
     } elseif (empty($row['full_name'])) {
         $error[] = $lang_module['error_required_full_name'];
     } elseif (empty($row['phone'])) {
         $error[] = $lang_module['error_required_phone'];
-    } elseif (! empty($row['email']) and ($error_email = nv_check_valid_email($row['email'])) != '') {
+    } elseif (!empty($row['email']) and ($error_email = nv_check_valid_email($row['email'])) != '') {
         $error[] = $error_email;
     }
-    
+
     if (empty($error)) {
         try {
             if (empty($row['id'])) {
                 $stmt = $db->prepare('INSERT INTO ' . NV_PREFIXLANG . '_' . $module_data . '_supporter (departmentid, full_name, image, phone, email, others, weight) VALUES (:departmentid, :full_name, :image, :phone, :email, :others, :weight)');
-                
+
                 $weight = $db->query('SELECT max(weight) FROM ' . NV_PREFIXLANG . '_' . $module_data . '_supporter WHERE departmentid=' . $row['departmentid'])->fetchColumn();
                 $weight = intval($weight) + 1;
                 $stmt->bindParam(':weight', $weight, PDO::PARAM_INT);
@@ -81,21 +83,19 @@ if ($nv_Request->isset_request('submit', 'post')) {
             $stmt->bindParam(':phone', $row['phone'], PDO::PARAM_STR);
             $stmt->bindParam(':email', $row['email'], PDO::PARAM_STR);
             $stmt->bindParam(':others', $row['others'], PDO::PARAM_STR, strlen($row['others']));
-            
+
             $exc = $stmt->execute();
             if ($exc) {
                 $nv_Cache->delMod($module_name);
-                Header('Location: ' . NV_BASE_ADMINURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $module_name . '&' . NV_OP_VARIABLE . '=supporter&departmentid=' . $row['departmentid']);
-                die();
+                nv_redirect_location(NV_BASE_ADMINURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $module_name . '&' . NV_OP_VARIABLE . '=supporter&departmentid=' . $row['departmentid']);
             }
         } catch (PDOException $e) {
             trigger_error($e->getMessage());
-            die($e->getMessage()); // Remove this line after checks finished
         }
     }
 }
 
-if (! empty($row['image']) and is_file(NV_UPLOADS_REAL_DIR . '/' . $module_upload . '/' . $row['image'])) {
+if (!empty($row['image']) and is_file(NV_UPLOADS_REAL_DIR . '/' . $module_upload . '/' . $row['image'])) {
     $row['image'] = NV_BASE_SITEURL . NV_UPLOADS_DIR . '/' . $module_upload . '/' . $row['image'];
 }
 
@@ -110,7 +110,7 @@ $xtpl->assign('MODULE_UPLOAD', $module_upload);
 $xtpl->assign('OP', $op);
 $xtpl->assign('ROW', $row);
 
-if (! empty($array_department)) {
+if (!empty($array_department)) {
     foreach ($array_department as $department) {
         $department['selected'] = $department['id'] == $row['departmentid'] ? 'selected="selected"' : '';
         $xtpl->assign('DEPARTMENT', $department);
@@ -118,23 +118,21 @@ if (! empty($array_department)) {
     }
 }
 
-if(empty($row['others'])){
-    $row['others'][] = array(
-        'name' => '',
-        'value' => ''
-    );
-}else{
+if (empty($row['others'])) {
+    $row['others'] = array();
+    $row['others'][] = array('name' => '', 'value' => '');
+} else {
     $row['others'] = unserialize($row['others']);
 }
 
-foreach($row['others'] as $index => $others){
+foreach ($row['others'] as $index => $others) {
     $others['index'] = $index;
     $xtpl->assign('OTHERS', $others);
     $xtpl->parse('main.others');
 }
 $xtpl->assign('COUNT', sizeof($row['others']));
 
-if (! empty($error)) {
+if (!empty($error)) {
     $xtpl->assign('ERROR', implode('<br />', $error));
     $xtpl->parse('main.error');
 }

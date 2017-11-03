@@ -2,7 +2,7 @@
 
 /**
  * @Project NUKEVIET 4.x
- * @Author VINADES.,JSC (contact@vinades.vn)
+ * @Author VINADES.,JSC <contact@vinades.vn>
  * @Copyright (C) 2014 VINADES.,JSC. All rights reserved
  * @License GNU/GPL version 2 or any later version
  * @Createdate 10/03/2010 10:51
@@ -14,13 +14,11 @@ if (!defined('NV_IS_MOD_USER')) {
 
 if (!defined('NV_IS_ADMIN')) {
     if (!defined('NV_IS_USER') or !$global_config['allowuserlogin']) {
-        Header('Location: ' . nv_url_rewrite(NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $module_name, true));
-        die();
+        nv_redirect_location(NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $module_name);
     }
 
-    if ((int)$user_info['safemode'] > 0) {
-        Header('Location: ' . nv_url_rewrite(NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $module_name . '&amp;' . NV_OP_VARIABLE . '=editinfo', true));
-        die();
+    if ((int) $user_info['safemode'] > 0) {
+        nv_redirect_location(NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $module_name . '&amp;' . NV_OP_VARIABLE . '=editinfo');
     }
 }
 
@@ -98,10 +96,11 @@ $checkss = $nv_Request->get_title('checkss', 'post', '');
 //Xoa avatar
 if ($checkss == $array['checkss'] and $nv_Request->isset_request('del', 'post')) {
     deleteAvatar();
-    die(json_encode(array(
+    nv_jsonOutput(array(
         'status' => 'ok',
         'input' => 'ok',
-        'mess' => $lang_module['editinfo_ok'])));
+        'mess' => $lang_module['editinfo_ok']
+    ));
 }
 
 $global_config['avatar_width'] = $global_users_config['avatar_width'];
@@ -117,7 +116,10 @@ if (isset($_FILES['image_file']) and is_uploaded_file($_FILES['image_file']['tmp
     if ($array['avatar_width'] < $global_config['avatar_width'] or $array['avatar_height'] < $global_config['avatar_height']) {
         $array['error'] = $lang_module['avatar_error_data'];
     } else {
-        $upload = new NukeViet\Files\Upload(array('images'), $global_config['forbid_extensions'], $global_config['forbid_mimes'], NV_UPLOAD_MAX_FILESIZE, NV_MAX_WIDTH, NV_MAX_HEIGHT);
+        $upload = new NukeViet\Files\Upload(array(
+            'images'
+        ), $global_config['forbid_extensions'], $global_config['forbid_mimes'], NV_UPLOAD_MAX_FILESIZE, NV_MAX_WIDTH, NV_MAX_HEIGHT);
+        $upload->setLanguage($lang_global);
 
         // Storage in temp dir
         $upload_info = $upload->save_file($_FILES['image_file'], NV_ROOTDIR . '/' . NV_TEMP_DIR, false);

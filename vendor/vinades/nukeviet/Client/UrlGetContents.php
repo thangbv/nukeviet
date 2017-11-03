@@ -2,7 +2,7 @@
 
 /**
  * @Project NUKEVIET 4.x
- * @Author VINADES.,JSC (contact@vinades.vn)
+ * @Author VINADES.,JSC <contact@vinades.vn>
  * @Copyright (C) 2014 VINADES.,JSC. All rights reserved
  * @License GNU/GPL version 2 or any later version
  * @Createdate 5-8-2010 1:13
@@ -45,12 +45,7 @@ class UrlGetContents
         }
 
         if (function_exists('ini_set') and !in_array('ini_set', $this->disable_functions)) {
-            ini_set('allow_url_fopen', 1);
             ini_set('default_socket_timeout', $this->time_limit);
-            $memoryLimitMB = ( integer )ini_get('memory_limit');
-            if ($memoryLimitMB < 64) {
-                ini_set('memory_limit', '64M');
-            }
             ini_set('user_agent', $this->user_agent);
         }
 
@@ -163,7 +158,7 @@ class UrlGetContents
             return false;
         }
         if (preg_match('/(301)|(302)|(303)/', $res[0])) {
-            foreach ($res as $k => $v) {
+            foreach ($res as $v) {
                 if (preg_match("/location:\s(.*?)$/is", $v, $matches)) {
                     ++$is_200;
                     $location = trim($matches[1]);

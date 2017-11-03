@@ -2,7 +2,7 @@
 
 /**
  * @Project NUKEVIET 4.x
- * @Author VINADES.,JSC (contact@vinades.vn)
+ * @Author VINADES.,JSC <contact@vinades.vn>
  * @Copyright (C) 2014 VINADES.,JSC. All rights reserved
  * @Language Tiếng Việt
  * @License CC BY-SA (http://creativecommons.org/licenses/by-sa/4.0/)
@@ -13,7 +13,7 @@ if (!defined('NV_ADMIN') or !defined('NV_MAINFILE')) {
     die('Stop!!!');
 }
 
-$lang_translator['author'] = 'VINADES.,JSC (contact@vinades.vn)';
+$lang_translator['author'] = 'VINADES.,JSC <contact@vinades.vn>';
 $lang_translator['createdate'] = '30/05/2010, 23:57';
 $lang_translator['copyright'] = 'Copyright (C) 2010 VINADES.,JSC. All rights reserved';
 $lang_translator['info'] = '';
@@ -52,7 +52,7 @@ $lang_module['answer'] = 'Câu trả lời';
 $lang_module['gender'] = 'Giới tính';
 $lang_module['male'] = 'Nam';
 $lang_module['female'] = 'Nữ';
-$lang_module['NA'] = 'N/A';
+$lang_module['na'] = 'N/A';
 $lang_module['name_show'] = 'Kiểu hiển thị họ tên';
 $lang_module['firstname_lastname'] = 'Tên và Họ';
 $lang_module['lastname_firstname'] = 'Họ và Tên';
@@ -70,6 +70,7 @@ $lang_module['in_group_default'] = 'Là nhóm mặc định';
 $lang_module['is_official'] = 'Là thành viên chính thức';
 $lang_module['is_official_note'] = 'Nếu không chọn, tài khoản này sẽ được đưa vào nhóm thành viên mới đăng ký';
 $lang_module['set_official_note'] = 'Cho làm thành viên chính thức';
+$lang_module['msgnocheck'] = 'Bạn cần chọn ít nhất 1 tài khoản để thực hiện';
 
 $lang_module['question'] = 'Câu hỏi bảo mật';
 $lang_module['addquestion'] = 'Thêm câu hỏi bảo mật';
@@ -98,7 +99,7 @@ $lang_module['deny_email'] = 'Các từ cấm sử dụng trong email tài kho�
 $lang_module['deny_name'] = 'Các từ cấm sử dụng trong tài khoản';
 $lang_module['password_simple'] = 'Các từ cấm sử dụng các mật khẩu đơn giản';
 $lang_module['memberlist_active'] = 'Hoạt động';
-$lang_module['memberlist_unactive'] = 'Hoạt động';
+$lang_module['memberlist_unactive'] = 'Dừng hoạt động';
 $lang_module['memberlist_error_method'] = 'Hãy chọn phương thức để tìm kiếm !';
 $lang_module['memberlist_error_value'] = 'Giá trị tìm kiếm không được để trống và không quá 64 kí tự !';
 $lang_module['memberlist_nousers'] = 'Không tìm thấy tài khoản nào phù hợp !';
@@ -471,3 +472,10 @@ $lang_module['user_oauthmanager_empty'] = 'Thành viên này chưa có OpenID ha
 $lang_module['user_oauthmanager_gate'] = 'Tên cổng';
 $lang_module['user_oauthmanager_email'] = 'Email sử dụng';
 $lang_module['user_oauthmanager_deleteall'] = 'Xóa tất cả';
+$lang_module['min_old_user'] = 'Số tuổi thành viên ít nhất để tham gia';
+$lang_module['error_system'] = '%s không được để trống';
+$lang_module['old_min_user_error'] = 'Tuổi của bạn dưới %s nên chưa đủ tuổi đăng ký';
+$lang_module['two_step_verification_require_admin'] = 'Bắt buộc xác thực hai bước khu vực quản trị';
+$lang_module['two_step_verification_require_site'] = 'Bắt buộc xác thực hai bước ngoài site';
+$lang_module['two_step_verification_require_admindefault'] = 'Thiết lập an ninh đang yêu cầu bật tại khu vực quản trị, dù không bật ở đây quản trị vẫn phải kích hoạt xác thực hai bước mới đăng nhập được';
+$lang_module['two_step_verification_require_sitedefault'] = 'Thiết lập an ninh đang yêu cầu bật ngoài site, dù không bật ở đây thành viên trong nhóm vẫn phải kích hoạt xác thực hai bước mới đăng nhập được';

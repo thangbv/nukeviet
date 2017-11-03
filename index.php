@@ -2,12 +2,16 @@
 
 /**
  * @Project NUKEVIET 4.x
- * @Author VINADES.,JSC (contact@vinades.vn)
+ * @Author VINADES.,JSC <contact@vinades.vn>
  * @Copyright (C) 2014 VINADES.,JSC.
  * All rights reserved
  * @License GNU/GPL version 2 or any later version
  * @Createdate 31/05/2010, 00:36
  */
+
+if (isset($_GET['response_headers_detect'])) {
+    exit(0);
+}
 
 define('NV_SYSTEM', true);
 
@@ -78,13 +82,6 @@ if (preg_match($global_config['check_module'], $module_name)) {
 
     // Kiểm tra module có trong hệ thống hay không
     if (isset($site_mods[$module_name])) {
-        // SSL
-        if ($global_config['ssl_https'] === 3 and !empty($global_config['ssl_https_modules']) and in_array($module_name, $global_config['ssl_https_modules']) and (!isset($_SERVER['HTTPS']) or $_SERVER['HTTPS'] == 'off')) {
-            header("HTTP/1.1 301 Moved Permanently");
-            header("Location: https://" . $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"]);
-            exit();
-        }
-
         // Global variable for module
         $module_info = $site_mods[$module_name];
         $module_file = $module_info['module_file'];
@@ -93,9 +90,11 @@ if (preg_match($global_config['check_module'], $module_name)) {
         $include_file = NV_ROOTDIR . '/modules/' . $module_file . '/funcs/main.php';
 
         if (file_exists($include_file)) {
-          if(empty($global_config['switch_mobi_des'])) {
-          	$global_config['array_theme_type'] = array_diff($global_config['array_theme_type'], array('m'));
-          }
+            if (empty($global_config['switch_mobi_des'])) {
+                $global_config['array_theme_type'] = array_diff($global_config['array_theme_type'], array(
+                    'm'
+                ));
+            }
             // Tuy chon kieu giao dien
             if ($nv_Request->isset_request('nv' . NV_LANG_DATA . 'themever', 'get')) {
                 $theme_type = $nv_Request->get_title('nv' . NV_LANG_DATA . 'themever', 'get', '', 1);
@@ -107,16 +106,14 @@ if (preg_match($global_config['check_module'], $module_name)) {
                 if (empty($nv_redirect)) {
                     $nv_redirect = NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA;
                 }
-                Header('Location: ' . nv_url_rewrite($nv_redirect));
-                die();
+                nv_redirect_location($nv_redirect);
             }
 
             // Xac dinh cac $op, $array_op
             $array_op = array();
 
             if (!preg_match('/^[a-z0-9\-\_\/\+]+$/i', $op)) {
-                Header('Location: ' . nv_url_rewrite(NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $module_name, true));
-                die();
+                nv_redirect_location(NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $module_name);
             }
 
             if ($op != 'main' and !isset($module_info['funcs'][$op])) {
@@ -141,8 +138,7 @@ if (preg_match($global_config['check_module'], $module_name)) {
                     if (empty($nv_redirect)) {
                         $nv_redirect = NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $module_name;
                     }
-                    Header('Location: ' . nv_url_rewrite($nv_redirect, true));
-                    die();
+                    nv_redirect_location($nv_redirect);
                 }
                 if ($drag_block) {
                     define('NV_IS_DRAG_BLOCK', true);
@@ -162,9 +158,9 @@ if (preg_match($global_config['check_module'], $module_name)) {
 
             // Xac dinh kieu giao dien mac dinh
             $global_config['current_theme_type'] = $nv_Request->get_string('nv' . NV_LANG_DATA . 'themever', 'cookie', '');
-            if(!in_array($global_config['current_theme_type'],$global_config['array_theme_type'])) {
-            	$global_config['current_theme_type'] = '';
-            	$nv_Request->set_Cookie('nv' . NV_LANG_DATA . 'themever', '', NV_LIVE_COOKIE_TIME);
+            if (!in_array($global_config['current_theme_type'], $global_config['array_theme_type'])) {
+                $global_config['current_theme_type'] = '';
+                $nv_Request->set_Cookie('nv' . NV_LANG_DATA . 'themever', '', NV_LIVE_COOKIE_TIME);
             }
 
             // Xac dinh giao dien chung
@@ -221,7 +217,33 @@ if (preg_match($global_config['check_module'], $module_name)) {
             }
 
             // Doc file cau hinh giao dien
-            $themeConfig = nv_object2array(simplexml_load_file(NV_ROOTDIR . '/themes/' . $global_config['module_theme'] . '/config.ini'));
+            $cache_file = NV_LANG_DATA . '_' . $global_config['module_theme'] . '_configposition_' . NV_CACHE_PREFIX . '.cache';
+            if (($cache = $nv_Cache->getItem('themes', $cache_file)) != false) {
+                $theme_config_positions = unserialize($cache);
+            } else {
+                $_themeConfig = nv_object2array(simplexml_load_file(NV_ROOTDIR . '/themes/' . $global_config['module_theme'] . '/config.ini'));
+                if (isset($_themeConfig['positions']['position']['name'])) {
+                    $theme_config_positions = array(
+                        $_themeConfig['positions']['position']
+                    );
+                } elseif (isset($_themeConfig['positions']['position'])) {
+                    $theme_config_positions = $_themeConfig['positions']['position'];
+                } else {
+                    $theme_config_positions = array();
+                    $_ini_file = file_get_contents(NV_ROOTDIR . '/themes/' . $global_config['module_theme'] . '/config.ini');
+                    if (preg_match_all('/<position>[\t\n\s]+<name>(.*?)<\/name>[\t\n\s]+<tag>(\[[a-zA-Z0-9_]+\])<\/tag>[\t\n\s]+<\/position>/s', $_ini_file, $_m)) {
+                        foreach ($_m[1] as $_key => $value) {
+                            $theme_config_positions[] = array(
+                                'name' => $value,
+                                'tag' => $_m[2][$_key]
+                            );
+                        }
+                    }
+                }
+                if (!empty($theme_config_positions)) {
+                    $nv_Cache->setItem('themes', $cache_file, serialize($theme_config_positions));
+                }
+            }
             require NV_ROOTDIR . '/themes/' . $global_config['module_theme'] . '/theme.php';
 
             // Ket noi ngon ngu theo theme
@@ -278,8 +300,7 @@ if (preg_match($global_config['check_module'], $module_name)) {
     } elseif (isset($sys_mods[$module_name])) {
         $groups_view = (string) $sys_mods[$module_name]['groups_view'];
         if (!defined('NV_IS_USER') and $groups_view == '4') {
-            Header('Location: ' . nv_url_rewrite(NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=users&' . NV_OP_VARIABLE . '=login&nv_redirect=' . nv_redirect_encrypt($client_info['selfurl']), true));
-            die();
+            nv_redirect_location(NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=users&' . NV_OP_VARIABLE . '=login&nv_redirect=' . nv_redirect_encrypt($client_info['selfurl']));
         } elseif (!defined('NV_IS_ADMIN') and ($groups_view == '2' or $groups_view == '1')) {
             // Exit
             nv_info_die($lang_global['error_404_title'], $lang_global['site_info'], $lang_global['module_for_admin'], 404);

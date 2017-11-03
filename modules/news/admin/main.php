@@ -2,7 +2,7 @@
 
 /**
  * @Project NUKEVIET 4.x
- * @Author VINADES.,JSC (contact@vinades.vn)
+ * @Author VINADES.,JSC <contact@vinades.vn>
  * @Copyright (C) 2010 - 2014 VINADES.,JSC. All rights reserved
  * @License GNU/GPL version 2 or any later version
  * @Createdate Sun, 08 Apr 2012 00:00:00 GMT
@@ -30,14 +30,67 @@ if ($per_page_old != $per_page) {
 $q = $nv_Request->get_title('q', 'get', '');
 $q = str_replace('+', ' ', $q);
 $qhtml = nv_htmlspecialchars($q);
-$ordername = $nv_Request->get_string('ordername', 'get', 'publtime');
+
+$order_articles = 0;
+if ($NV_IS_ADMIN_MODULE and $module_config[$module_name]['order_articles'] and empty($q) and $sstatus == -1) {
+    $order_articles = 1;
+
+    $_weight_new = $nv_Request->get_int('order_articles_new', 'post', 0);
+    $_id = $nv_Request->get_int('order_articles_id', 'post', 0);
+    if ($_id > 0 and $_weight_new > 0) {
+        $sql = 'SELECT weight, listcatid FROM ' . NV_PREFIXLANG . '_' . $module_data . '_rows WHERE id=' . $_id;
+        $_row1 = $db->query($sql)->fetch();
+        if (!empty($_row1)) {
+            $_weight1 = min($_weight_new, $_row1['weight']);
+            $_weight2 = max($_weight_new, $_row1['weight']);
+            if ($_weight_new > $_row1['weight']) {
+                // Kiểm tra không cho set weight lơn hơn maxweight
+                $maxweight = $db->query('SELECT max(weight) FROM ' . NV_PREFIXLANG . '_' . $module_data . '_rows')->fetchColumn();
+                if ($_weight_new > $maxweight) {
+                    $_weight_new = $maxweight;
+                }
+            }
+
+            $sql = 'SELECT id, listcatid FROM ' . NV_PREFIXLANG . '_' . $module_data . '_rows WHERE weight BETWEEN ' . $_weight1 . '  AND ' . $_weight2 . ' AND id!=' . $_id . ' ORDER BY weight ASC, publtime ASC';
+            $result = $db->query($sql);
+            $weight = $_weight1;
+            while ($_row2 = $result->fetch()) {
+                if ($weight == $_weight_new) {
+                    ++$weight;
+                }
+                $db->query('UPDATE ' . NV_PREFIXLANG . '_' . $module_data . '_rows SET weight=' . $weight . ' WHERE id=' . $_row2['id']);
+                $_array_catid = explode(',', $_row2['listcatid']);
+                foreach ($_array_catid as $_catid) {
+                    try {
+                        $db->query('UPDATE ' . NV_PREFIXLANG . '_' . $module_data . '_' . intval($_catid) . ' SET weight=' . $weight . ' WHERE id=' . $_row2['id']);
+                    } catch (PDOException $e) {}
+                }
+                ++$weight;
+            }
+            $db->query('UPDATE ' . NV_PREFIXLANG . '_' . $module_data . '_rows SET weight=' . $_weight_new . ' WHERE id=' . $_id);
+            $_array_catid = explode(',', $_row1['listcatid']);
+            foreach ($_array_catid as $_catid) {
+                try {
+                    $db->query('UPDATE ' . NV_PREFIXLANG . '_' . $module_data . '_' . intval($_catid) . ' SET weight=' . $_weight_new . ' WHERE id=' . $_id);
+                } catch (PDOException $e) {}
+            }
+            $nv_Cache->delMod($module_name);
+        }
+    }
+}
+
+$ordername = ($module_config[$module_name]['order_articles'] == 1) ? 'weight' : 'publtime';
+$ordername = $nv_Request->get_string('ordername', 'get', $ordername);
+
 $order = $nv_Request->get_string('order', 'get') == 'asc' ? 'asc' : 'desc';
+
 $val_cat_content = array();
 $val_cat_content[] = array(
     'value' => 0,
     'selected' => ($catid == 0) ? ' selected="selected"' : '',
     'title' => $lang_module['search_cat_all']
 );
+
 $array_cat_view = array();
 $check_declined = false;
 foreach ($global_array_cat as $catid_i => $array_value) {
@@ -85,8 +138,7 @@ foreach ($global_array_cat as $catid_i => $array_value) {
     }
 }
 if (!defined('NV_IS_ADMIN_MODULE') and $catid > 0 and !in_array($catid, $array_cat_view)) {
-    Header('Location: ' . NV_BASE_ADMINURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $module_name . '&' . NV_OP_VARIABLE . '=main');
-    die();
+    nv_redirect_location(NV_BASE_ADMINURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $module_name . '&' . NV_OP_VARIABLE . '=main');
 }
 $array_search = array(
     '-' => '---' . $lang_module['search_type'] . '---',
@@ -151,7 +203,7 @@ if (defined('NV_IS_ADMIN_MODULE')) {
 if (!in_array($stype, array_keys($array_search))) {
     $stype = '-';
 }
-if ($sstatus < 0 or $sstatus > 10) {
+if ($sstatus < 0 or ($sstatus > 10 and $sstatus != ($global_code_defined['row_locked_status'] + 1))) {
     $sstatus = -1;
 }
 if (!in_array($ordername, array_keys($array_in_ordername))) {
@@ -313,13 +365,25 @@ if (($module_config[$module_name]['elas_use'] == 1) && $checkss == NV_CHECK_SESS
     }
 
     if ($sstatus != -1) {
-        $search_elastic_status = [
-            'filter' => [
-                'match' => [
-                    'status' => $sstatus
+        if ($sstatus > $global_code_defined['row_locked_status']) {
+            $search_elastic_status = [
+                'filter' => [
+                    'range' => [
+                        'status' => [
+                            'gt' => $global_code_defined['row_locked_status']
+                        ]
+                    ]
                 ]
-            ]
-        ];
+            ];
+        } else {
+            $search_elastic_status = [
+                'filter' => [
+                    'match' => [
+                        'status' => $sstatus
+                    ]
+                ]
+            ];
+        }
         if (!empty($q)) {
             $search_elastic = array_merge($search_elastic, $search_elastic_status);
         } else {
@@ -439,8 +503,8 @@ if (($module_config[$module_name]['elas_use'] == 1) && $checkss == NV_CHECK_SESS
             'title' => $title,
             'publtime' => $publtime,
             'status_id' => $status,
-            'status' => $lang_module['status_' . $status],
-            'class' => $array_status_class[$status],
+            'status' => $status > $global_code_defined['row_locked_status'] ? $lang_module['content_locked_bycat'] : $lang_module['status_' . $status],
+            'class' => $status > $global_code_defined['row_locked_status'] ? $array_status_class['4'] : $array_status_class[$status],
             'userid' => $_userid,
             'hitstotal' => number_format($hitstotal, 0, ',', '.'),
             'hitscm' => number_format($hitscm, 0, ',', '.'),
@@ -474,16 +538,21 @@ if (($module_config[$module_name]['elas_use'] == 1) && $checkss == NV_CHECK_SESS
                 $arr_from[] = "(r." . $val . " LIKE '%" . $db_slave->dblikeescape($q) . "%')";
             }
             $where = " (r.author LIKE '%" . $db_slave->dblikeescape($qhtml) . "%'
-    			OR r.title LIKE '%" . $db_slave->dblikeescape($qhtml) . "%'
-    			OR c.bodyhtml LIKE '%" . $db_slave->dblikeescape($q) . "%'
-    			OR u.username LIKE '%" . $db_slave->dblikeescape($qhtml) . "%'
-    			OR u.first_name LIKE '%" . $db_slave->dblikeescape($qhtml) . "%')";
+                OR r.title LIKE '%" . $db_slave->dblikeescape($qhtml) . "%'
+                OR c.bodyhtml LIKE '%" . $db_slave->dblikeescape($q) . "%'
+                OR u.username LIKE '%" . $db_slave->dblikeescape($qhtml) . "%'
+                OR u.first_name LIKE '%" . $db_slave->dblikeescape($qhtml) . "%')";
         }
         if ($sstatus != -1) {
-            if ($where == '') {
-                $where = ' r.status = ' . $sstatus;
+            if ($sstatus > $global_code_defined['row_locked_status']) {
+                $where_status = 'r.status > ' . $global_code_defined['row_locked_status'];
             } else {
-                $where .= ' AND r.status = ' . $sstatus;
+                $where_status = 'r.status = ' . $sstatus;
+            }
+            if ($where == '') {
+                $where = ' ' . $where_status;
+            } else {
+                $where .= ' AND ' . $where_status;
             }
         }
         if (strpos($where, 'u.username')) {
@@ -535,16 +604,15 @@ if (($module_config[$module_name]['elas_use'] == 1) && $checkss == NV_CHECK_SESS
     }
     $base_url_mod .= '&amp;stype=' . $stype . '&amp;num_items=' . $num_items . '&amp;num_checkss=' . $num_checkss;
 
-    $db_slave->select('r.id, r.catid, r.listcatid, r.admin_id, r.title, r.alias, r.status , r.publtime, r.exptime, r.hitstotal, r.hitscm, r.admin_id')
+    $db_slave->select('r.id, r.catid, r.listcatid, r.admin_id, r.title, r.alias, r.status, r.weight, r.publtime, r.exptime, r.hitstotal, r.hitscm, r.admin_id')
         ->order('r.' . $ordername . ' ' . $order)
         ->limit($per_page)
         ->offset(($page - 1) * $per_page);
     $result = $db_slave->query($db_slave->sql());
 
     $data = $array_ids = $array_userid = array();
-    while (list ($id, $catid_i, $listcatid, $post_id, $title, $alias, $status, $publtime, $exptime, $hitstotal, $hitscm, $_userid) = $result->fetch(3)) {
+    while (list ($id, $catid_i, $listcatid, $post_id, $title, $alias, $status, $weight, $publtime, $exptime, $hitstotal, $hitscm, $_userid) = $result->fetch(3)) {
         $publtime = nv_date('H:i d/m/y', $publtime);
-        $title = nv_clean60($title);
 
         if ($catid > 0) {
             $catid_i = $catid;
@@ -573,10 +641,12 @@ if (($module_config[$module_name]['elas_use'] == 1) && $checkss == NV_CHECK_SESS
                             if ($status) {
                                 $_permission_action['exptime'] = true;
                             }
-                        } elseif ($array_cat_admin[$admin_id][$catid_i]['pub_content'] == 1 and $status == 0) {
+                        } elseif ($array_cat_admin[$admin_id][$catid_i]['pub_content'] == 1 and ($status == 0 or $status == 8 or $status == 2)) {
                             ++$check_edit;
                             $_permission_action['publtime'] = true;
                             $_permission_action['re-published'] = true;
+                        } elseif ($array_cat_admin[$admin_id][$catid_i]['app_content'] == 1 and $status == 5) {
+                            ++$check_edit;
                         } elseif (($status == 0 or $status == 4 or $status == 5) and $post_id == $admin_id) {
                             ++$check_edit;
                             $_permission_action['waiting'] = true;
@@ -614,10 +684,12 @@ if (($module_config[$module_name]['elas_use'] == 1) && $checkss == NV_CHECK_SESS
             'id' => $id,
             'link' => NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&amp;' . NV_NAME_VARIABLE . '=' . $module_name . '&amp;' . NV_OP_VARIABLE . '=' . $global_array_cat[$catid_i]['alias'] . '/' . $alias . '-' . $id . $global_config['rewrite_exturl'],
             'title' => $title,
+            'title_clean' => nv_clean60($title),
             'publtime' => $publtime,
             'status_id' => $status,
-            'status' => $lang_module['status_' . $status],
-            'class' => $array_status_class[$status],
+            'weight' => $weight,
+            'status' => $status > $global_code_defined['row_locked_status'] ? $lang_module['content_locked_bycat'] : $lang_module['status_' . $status],
+            'class' => $status > $global_code_defined['row_locked_status'] ? $array_status_class['4'] : $array_status_class[$status],
             'userid' => $_userid,
             'hitstotal' => number_format($hitstotal, 0, ',', '.'),
             'hitscm' => number_format($hitscm, 0, ',', '.'),
@@ -638,6 +710,13 @@ for ($i = 0; $i <= 10; $i++) {
         'selected' => $sl
     );
 }
+$fixedkey = $global_code_defined['row_locked_status'] + 1;
+$sl = ($fixedkey == $sstatus) ? ' selected="selected"' : '';
+$search_status[] = array(
+    'key' => $fixedkey,
+    'value' => $lang_module['status_lockbycat'],
+    'selected' => $sl
+);
 
 $i = 5;
 $search_per_page = array();
@@ -705,6 +784,8 @@ $xtpl->assign('NV_NAME_VARIABLE', NV_NAME_VARIABLE);
 $xtpl->assign('MODULE_NAME', $module_name);
 $xtpl->assign('OP', $op);
 $xtpl->assign('Q', $qhtml);
+
+$xtpl->assign('CATID', $catid);
 $xtpl->assign('base_url_id', $base_url_id);
 $xtpl->assign('base_url_name', $base_url_name);
 $xtpl->assign('base_url_publtime', $base_url_publtime);
@@ -748,24 +829,29 @@ foreach ($data as $row) {
         $row['title'] = $lang_module['no_name'];
     }
     $row['username'] = isset($array_userid[$row['userid']]) ? $array_userid[$row['userid']] : '';
-	$xtpl->assign('ROW', $row);
+    $xtpl->assign('ROW', $row);
 
     if ($is_excdata) {
         $xtpl->parse('main.loop.excdata');
     }
-	if($module_config[$module_name]['copy_news'] == 1) {
-		$url_copy = NV_BASE_ADMINURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&amp;' . NV_NAME_VARIABLE . '=' . $module_name . '&amp;' . NV_OP_VARIABLE . '=content&amp;copy=1&amp;id=' . $row['id'];
-		$xtpl->assign('URL_COPY', $url_copy);
-		$xtpl->parse('main.loop.copy_news');
-	}
+    if ($module_config[$module_name]['copy_news'] == 1) {
+        $url_copy = NV_BASE_ADMINURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&amp;' . NV_NAME_VARIABLE . '=' . $module_name . '&amp;' . NV_OP_VARIABLE . '=content&amp;copy=1&amp;id=' . $row['id'];
+        $xtpl->assign('URL_COPY', $url_copy);
+        $xtpl->parse('main.loop.copy_news');
+    }
 
     if ($row['status_id'] == 4) {
         $xtpl->parse('main.loop.text');
     }
+
+    if ($order_articles) {
+        $xtpl->parse('main.loop.sort');
+    }
+
     $xtpl->parse('main.loop');
 }
 
-while (list ($action_i, $title_i) = each($array_list_action)) {
+foreach ($array_list_action as $action_i => $title_i) {
     if (defined('NV_IS_ADMIN_MODULE') or isset($_permission_action[$action_i])) {
         $action_assign = array(
             'value' => $action_i,

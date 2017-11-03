@@ -2,7 +2,7 @@
 
 /**
  * @Project NUKEVIET 4.x
- * @Author VINADES.,JSC (contact@vinades.vn)
+ * @Author VINADES.,JSC <contact@vinades.vn>
  * @Copyright (C) 2017 VINADES.,JSC. All rights reserved
  * @Language English
  * @License CC BY-SA (http://creativecommons.org/licenses/by-sa/4.0/)
@@ -13,7 +13,7 @@ if (!defined('NV_ADMIN') or !defined('NV_MAINFILE')) {
     die('Stop!!!');
 }
 
-$lang_translator['author'] = 'VINADES.,JSC (contact@vinades.vn)';
+$lang_translator['author'] = 'VINADES.,JSC <contact@vinades.vn>';
 $lang_translator['createdate'] = '04/03/2010, 15:22';
 $lang_translator['copyright'] = '@Copyright (C) 2010 VINADES.,JSC. All rights reserved';
 $lang_translator['info'] = '';
@@ -78,6 +78,10 @@ $lang_module['type_linux'] = 'Linux Mail';
 $lang_module['type_phpmail'] = 'PHPmail';
 $lang_module['smtp_server'] = 'Mail Server Configurations';
 $lang_module['incoming_ssl'] = 'Encrypted connection Method';
+$lang_module['verify_peer_ssl_yes'] = 'Yes';
+$lang_module['verify_peer_ssl_no'] = 'No';
+$lang_module['verify_peer_ssl'] = 'Ssl verify peer';
+$lang_module['verify_peer_name_ssl'] = 'Ssl verify name peer';
 $lang_module['outgoing'] = 'Outgoing mail server (SMTP)';
 $lang_module['outgoing_port'] = 'Outgoing port';
 $lang_module['smtp_username'] = 'Mail Account';
@@ -203,9 +207,7 @@ $lang_module['ssl_https_module'] = 'These modules enable SSL';
 $lang_module['ssl_https_0'] = 'Turn off SSL';
 $lang_module['ssl_https_1'] = 'Activate whole site';
 $lang_module['ssl_https_2'] = 'Activate the admin area';
-$lang_module['ssl_https_3'] = 'Activation in the selected module';
 $lang_module['note_ssl'] = 'Are you sure your site support https does not? If not supported site will be inaccessible after saving?';
-$lang_module['note_ssl_modules'] = 'Each language will have different modules, click to select the module';
 $lang_module['timezoneAuto'] = 'By computer of visitor';
 $lang_module['timezoneByCountry'] = 'By country of visitor';
 $lang_module['allow_switch_mobi_des'] = 'Allow to switch mobile, desktop theme';
@@ -223,6 +225,7 @@ $lang_module['plugin_area'] = 'Area';
 $lang_module['plugin_area_1'] = 'Before the database connection';
 $lang_module['plugin_area_2'] = 'Before run the module';
 $lang_module['plugin_area_3'] = 'Website content before sending to the browser';
+$lang_module['plugin_area_4'] = 'After run the module';
 $lang_module['plugin_number'] = 'Order Number';
 $lang_module['plugin_func'] = 'Aunction';
 $lang_module['plugin_add'] = 'Add a plugin';
@@ -244,3 +247,5 @@ $lang_module['two_step_verification3'] = 'All areas';
 $lang_module['site_phone'] = 'Site\'s phone';
 $lang_module['googleMapsAPI'] = 'Google Maps API key';
 $lang_module['googleMapsAPI_guide'] = '<a href="https://wiki.nukeviet.vn/google:api:creat-google-map-apikey" target="_blank">Guide to get Google Maps API key</a>';
+$lang_module['err_save_sysconfig'] = 'The changes have been saved but the system does not write to the configuration file. Please grant write permission to file %s and then execute again';
+$lang_module['two_step_verification_note'] = 'Note: This configuration applies to all accounts of groups, if you need to configure each group individually, select this value as <strong />%s then edit the <a href="%s"> group </a>, then select the required two-step authentication trigger field as desired';

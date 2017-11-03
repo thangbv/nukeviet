@@ -37,7 +37,7 @@
     </tr>
     <tr>
         <th scope="row" class="specalt">{LANG.db_pass}</th>
-        <td class="alt"><input type="password" value="{DATADASE.dbpass}" name="dbpass"  class="w200" /></td>
+        <td class="alt"><input type="password" autocomplete="off" value="{DATADASE.dbpass}" name="dbpass"  class="w200" /></td>
         <td class="alt">{LANG.db_pass_note}</td>
     </tr>
     <tr>
@@ -55,8 +55,8 @@
     <tr>
         <th class="spec"></th>
         <td class="spec" colspan="2">
-            <!-- BEGIN: db_detete --> <input
-                type="checkbox" name="db_detete" value="1" />{LANG.db_detete} &nbsp; &nbsp;
+            <!-- BEGIN: db_detete -->
+            <input type="checkbox" name="db_detete" id="db_detete" value="1" class="checkbox"/><label for="db_detete">{LANG.db_detete}</label> &nbsp; &nbsp;
             <!-- END: db_detete -->
             <input class="button" type="submit" value="{LANG.refesh}" />
         </td>

@@ -2,7 +2,7 @@
 
 /**
  * @Project NUKEVIET 4.x
- * @Author VINADES.,JSC (contact@vinades.vn)
+ * @Author VINADES.,JSC <contact@vinades.vn>
  * @Copyright (C) 2014 VINADES.,JSC. All rights reserved
  * @License GNU/GPL version 2 or any later version
  * @Createdate 1-27-2010 5:25
@@ -51,11 +51,11 @@ function nv_create_submenu()
  */
 function nv_blocks_content($sitecontent)
 {
-    global $db, $nv_Cache, $module_info, $module_name, $op, $global_config, $lang_global, $sys_mods, $user_info, $client_info, $themeConfig;
+    global $db, $nv_Cache, $module_info, $module_name, $op, $global_config, $lang_global, $sys_mods, $client_info, $theme_config_positions;
 
     $_posAllowed = array();
 
-    foreach ($themeConfig['positions']['position'] as $_pos) {
+    foreach ($theme_config_positions as $_pos) {
         $_pos = trim(( string )$_pos['tag']);
         unset($matches);
         if (preg_match('/^\[([^\]]+)\]$/is', $_pos, $matches)) {
@@ -148,7 +148,7 @@ function nv_blocks_content($sitecontent)
     if (! empty($blocks)) {
         $unact = array();
         global $blockID;
-        
+
         $array_position = array_keys($_posReal);
         foreach ($blocks as $_key => $_row) {
             if ($_row['exp_time'] != 0 and $_row['exp_time'] <= NV_CURRENTTIME) {
@@ -180,7 +180,7 @@ function nv_blocks_content($sitecontent)
                 $blockTitle = $_row['blockTitle'];
                 $content = '';
                 $blockID = 'nv' . $_key;
-                
+
                 if ($_row['module'] == 'theme' and file_exists(NV_ROOTDIR . '/themes/' . $global_config['module_theme'] . '/blocks/' . $_row['file_name'])) {
                     include NV_ROOTDIR . '/themes/' . $global_config['module_theme'] . '/blocks/' . $_row['file_name'];
                 } elseif (isset($sys_mods[$_row['module']]['module_file']) and ! empty($sys_mods[$_row['module']]['module_file']) and file_exists(NV_ROOTDIR . '/modules/' . $sys_mods[$_row['module']]['module_file'] . '/blocks/' . $_row['file_name'])) {
@@ -266,7 +266,7 @@ function nv_blocks_content($sitecontent)
  */
 function nv_html_meta_tags($html = true)
 {
-    global $global_config, $db_config, $lang_global, $key_words, $description, $module_info, $home, $client_info, $op, $page_title, $canonicalUrl, $meta_property;
+    global $global_config, $lang_global, $key_words, $description, $module_info, $home, $client_info, $op, $page_title, $canonicalUrl, $meta_property;
 
     $return = array();
     $site_description = $home ? $global_config['site_description'] : (! empty($description) ? $description : (empty($module_info['description']) ? '' : $module_info['description']));
@@ -385,10 +385,12 @@ function nv_html_meta_tags($html = true)
             'content' => 'width=device-width, initial-scale=1' );
     }
 
-    if ($home) {
-        $canonicalUrl = nv_url_rewrite(NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $global_config['site_home_module'], true);
-    } elseif (empty($canonicalUrl)) {
-        $canonicalUrl = str_replace(NV_MY_DOMAIN . '/', NV_MAIN_DOMAIN . '/', $client_info['selfurl']);
+    if (empty($canonicalUrl)) {
+        if ($home) {
+            $canonicalUrl = nv_url_rewrite(NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $global_config['site_home_module'], true);
+        } else {
+            $canonicalUrl = str_replace(NV_MY_DOMAIN . '/', NV_MAIN_DOMAIN . '/', $client_info['selfurl']);
+        }
     }
     if (substr($canonicalUrl, 0, 4) != 'http') {
         if (substr($canonicalUrl, 0, 1) != '/') {
@@ -566,7 +568,7 @@ function nv_html_css($html = true)
         } else {
             return array( array( 'rel' => 'StyleSheet', 'href' => NV_BASE_SITEURL . "themes/" . $module_info['template'] . "/css/" . $module_file . ".css" ) );
         }
-    }    
+    }
 
     return $html ? '' : array();
 }
@@ -667,7 +669,7 @@ function nv_html_site_js($html = true)
  */
 function nv_admin_menu()
 {
-    global $lang_global, $admin_info, $module_info, $module_name, $global_config, $client_info;
+    global $lang_global, $admin_info, $module_info, $module_name, $global_config, $client_info, $db_config, $db;
 
     if ($module_info['theme'] == $module_info['template'] and file_exists(NV_ROOTDIR . '/themes/' . $module_info['template'] . '/system/admin_toolbar.tpl')) {
         $block_theme = $module_info['template'];
@@ -683,13 +685,15 @@ function nv_admin_menu()
     $xtpl->assign('URL_AUTHOR', NV_BASE_SITEURL . NV_ADMINDIR . '/index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&amp;' . NV_NAME_VARIABLE . '=authors&amp;id=' . $admin_info['admin_id']);
 
     if (defined('NV_IS_SPADMIN')) {
-        $new_drag_block = (defined('NV_IS_DRAG_BLOCK')) ? 0 : 1;
-        $lang_drag_block = ($new_drag_block) ? $lang_global['drag_block'] : $lang_global['no_drag_block'];
+        $row = $db->query('SELECT * FROM ' . $db_config['dbsystem'] . '.' . NV_AUTHORS_GLOBALTABLE . '_module WHERE act_' . $admin_info['level'] . ' = 1 AND module=\'themes\'')->fetch();
+        if(!empty($row)){
+            $new_drag_block = (defined('NV_IS_DRAG_BLOCK')) ? 0 : 1;
+            $lang_drag_block = ($new_drag_block) ? $lang_global['drag_block'] : $lang_global['no_drag_block'];
 
-        $xtpl->assign('URL_DBLOCK', NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&amp;' . NV_NAME_VARIABLE . '=' . $module_name . '&amp;drag_block=' . $new_drag_block . '&amp;nv_redirect=' . nv_redirect_encrypt($client_info['selfurl']));
-        $xtpl->assign('LANG_DBLOCK', $lang_drag_block);
-
-        $xtpl->parse('main.is_spadmin');
+            $xtpl->assign('URL_DBLOCK', NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&amp;' . NV_NAME_VARIABLE . '=' . $module_name . '&amp;drag_block=' . $new_drag_block . '&amp;nv_redirect=' . nv_redirect_encrypt($client_info['selfurl']));
+            $xtpl->assign('LANG_DBLOCK', $lang_drag_block);
+            $xtpl->parse('main.is_spadmin');
+        }
     }
 
     if (defined('NV_IS_MODADMIN') and ! empty($module_info['admin_file'])) {
@@ -713,7 +717,7 @@ function nv_groups_list_pub($mod_data = 'users')
     global $nv_Cache, $db, $db_config, $global_config;
 
     $_mod_table = ($mod_data == 'users') ? NV_USERS_GLOBALTABLE : $db_config['prefix'] . '_' . $mod_data;
-    
+
     $query = 'SELECT group_id, title, group_type, exp_time FROM ' . $_mod_table . '_groups WHERE act=1 AND (idsite = ' . $global_config['idsite'] . ' OR (idsite =0 AND siteus = 1)) ORDER BY idsite, weight';
     $list = $nv_Cache->db($query, '', $mod_data);
 

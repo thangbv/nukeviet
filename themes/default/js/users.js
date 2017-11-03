@@ -69,7 +69,7 @@ function datepickerShow(a) {
             showOn: "focus",
             yearRange: "-90:+0"
         });
-        $(a).css("z-index", "1000").datepicker('show');
+        $(a).css("z-index", "9998").datepicker('show');
     }
 }
 
@@ -99,7 +99,7 @@ function showQlist(a) {
 
 function addQuestion(a) {
     var b = $(a).parent().parent().parent().parent();
-    $("[name=your_question]", b).val($(a).text());
+    $("[name=question]", b).val($(a).text());
     $(".qlist", b).attr("data-show", "no").hide();
     return !1
 }
@@ -211,8 +211,8 @@ function login_validForm(a) {
             var b = $("[onclick*='change_captcha']", a);
             b && b.click();
             if (d.status == "error") {
-                $("input,button", a).not("[type=submit]").prop("disabled", !1), 
-                $(".tooltip-current", a).removeClass("tooltip-current"), 
+                $("input,button", a).not("[type=submit]").prop("disabled", !1),
+                $(".tooltip-current", a).removeClass("tooltip-current"),
                 "" != d.input ? $(a).find("[name=\"" + d.input + "\"]").each(function() {
                     $(this).addClass("tooltip-current").attr("data-current-mess", d.mess);
                     validErrorShow(this)
@@ -223,7 +223,7 @@ function login_validForm(a) {
                     }
                 }, 1E3)
             } else if (d.status == "ok") {
-                $(".nv-info", a).html(d.mess + '<span class="load-bar"></span>').removeClass("error").addClass("success").show(), 
+                $(".nv-info", a).html(d.mess + '<span class="load-bar"></span>').removeClass("error").addClass("success").show(),
                 $(".form-detail", a).hide(), $("#other_form").hide(), setTimeout(function() {
                     if( "undefined" != typeof d.redirect && "" != d.redirect){
                          window.location.href = d.redirect;
@@ -300,39 +300,52 @@ function lostpass_validForm(a) {
         "INPUT" != b && "TEXTAREA" != b || "password" == $(a).prop("type") || "radio" == $(a).prop("type") || "checkbox" == $(a).prop("type") || $(this).val(trim(strip_tags($(this).val())));
         if (!validCheck(this)) return d++, $(".tooltip-current", a).removeClass("tooltip-current"), $(this).addClass("tooltip-current").attr("data-current-mess", $(this).attr("data-mess")), validErrorShow(this), !1
     });
-    d || (c.type = $(a).prop("method"), c.url = $(a).prop("action"), c.data = $(a).serialize(), formErrorHidden(a), $(a).find("input,button,select,textarea").prop("disabled", !0), $.ajax({
-        type: c.type,
-        cache: !1,
-        url: c.url,
-        data: c.data,
-        dataType: "json",
-        success: function(b) {
-            if (b.status == "error") {
-                $("[name=step]",a).val(b.step);
-                 if(b.step == 'step1') {
-                    $("[onclick*='change_captcha']", a).click();
-                    (nv_is_recaptcha && change_captcha());
-                 }
-                 if("undefined" != typeof b.info && "" != b.info) $(".nv-info",a).removeClass('error success').text(b.info);
-                $("input,button", a).prop("disabled", !1);
-                $(".required",a).removeClass("required");
-                $(".tooltip-current", a).removeClass("tooltip-current");
-                $("[class*=step]", a).hide();
-                $("." + b.step + " input", a).addClass("required");
-                $("." + b.step, a).show();
-                $(a).find("[name=" + b.input + "]").each(function() {
-                    $(this).addClass("tooltip-current").attr("data-current-mess", b.mess);
-                    validErrorShow(this)
-                });
-            } else {
-                 $(".nv-info", a).html(b.mess + '<span class="load-bar"></span>').removeClass("error").addClass("success").show();
-                 setTimeout(function() {
-                window.location.href = b.input
-                }, 6E3)
-            }
+    if (!d) {
+        if (nv_is_recaptcha && $("[name=step]",a).val() == 'step1') {
+            $("[name=gcaptcha_session]",a).val($("[name=g-recaptcha-response]",a).val());
         }
-    }));
-    return !1
+        c.type = $(a).prop("method"), c.url = $(a).prop("action"), c.data = $(a).serialize(), formErrorHidden(a), $(a).find("input,button,select,textarea").prop("disabled", !0);
+        $.ajax({
+            type: c.type,
+            cache: !1,
+            url: c.url,
+            data: c.data,
+            dataType: "json",
+            success: function(b) {
+                if (b.status == "error") {
+                    $("[name=step]",a).val(b.step);
+                    if("undefined" != typeof b.info && "" != b.info) $(".nv-info",a).removeClass('error success').text(b.info);
+                    $("input,button", a).prop("disabled", !1);
+                    $(".required",a).removeClass("required");
+                    $(".tooltip-current", a).removeClass("tooltip-current");
+                    $("[class*=step]", a).hide();
+                    $("." + b.step + " input", a).addClass("required");
+                    $("." + b.step, a).show();
+                    if (b.input == '') {
+                        $(".nv-info", a).html(b.mess).addClass("error").show();
+                    } else {
+                        $(a).find("[name=\"" + b.input + "\"]").each(function() {
+                            $(this).addClass("tooltip-current").attr("data-current-mess", b.mess);
+                            validErrorShow(this);
+                        });
+                    }
+                    if(b.step == 'step1') {
+                        $("[onclick*='change_captcha']", a).click();
+                        if (nv_is_recaptcha) {
+                            change_captcha();
+                            $("[name=gcaptcha_session]",a).val('');
+                        }
+                    }
+                } else {
+                    $(".nv-info", a).html(b.mess + '<span class="load-bar"></span>').removeClass("error").addClass("success").show();
+                    setTimeout(function() {
+                        window.location.href = b.input;
+                    }, 6E3);
+                }
+            }
+        });
+    }
+    return !1;
 }
 
 function changemail_validForm(a) {
@@ -495,7 +508,7 @@ UAV.common = {
                     $('#' + UAV.config.imageType).html(file.type);
                     $('#' + UAV.config.imageSize).html(UAV.tool.bytes2Size(file.size));
                     $('#' + UAV.config.originalDimension).html(img.naturalWidth + ' x ' + img.naturalHeight);
-                    
+
                     UAV.data.cropperApi = $('#' + UAV.config.target).cropper({
                         viewMode: 3,
                         dragMode: 'crop',

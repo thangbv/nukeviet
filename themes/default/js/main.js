@@ -1,6 +1,6 @@
 /* *
  * @Project NUKEVIET 4.x
- * @Author VINADES.,JSC (contact@vinades.vn)
+ * @Author VINADES.,JSC <contact@vinades.vn>
  * @Copyright (C) 2014 VINADES.,JSC. All rights reserved
  * @License GNU/GPL version 2 or any later version
  * @Createdate 31/05/2010, 00:36
@@ -41,28 +41,31 @@ function fix_banner_center() {
 }
 
 function timeoutsesscancel() {
-    clearInterval(myTimersecField);
-    $.ajax({
-        url: nv_base_siteurl + "index.php?second=statimg",
-        cache: !1
-    }).done(function() {
-        $("#timeoutsess").hide();
-        myTimerPage = setTimeout(function() {
-            timeoutsessrun()
-        }, nv_check_pass_mstime)
-    })
+	$("#timeoutsess").slideUp("slow", function() {
+		clearInterval(myTimersecField);
+		myTimerPage = setTimeout(function() {
+			timeoutsessrun()
+		}, nv_check_pass_mstime)
+	})
 }
 
 function timeoutsessrun() {
-    clearInterval(myTimerPage);
-    document.getElementById("secField").innerHTML = 60;
-    jQuery("#timeoutsess").show();
-    var a = (new Date).getTime();
-    myTimersecField = setInterval(function() {
-        var b = (new Date).getTime(),
-            b = 60 - Math.round((b - a) / 1E3);
-        0 <= b ? document.getElementById("secField").innerHTML = b : -3 > b && (clearInterval(myTimersecField), $(window).unbind(), window.location.reload())
-    }, 1E3)
+	clearInterval(myTimerPage);
+	$("#secField").text("60");
+	jQuery("#timeoutsess").show();
+	var b = (new Date).getTime();
+	myTimersecField = setInterval(function() {
+		var a = (new Date).getTime();
+		a = 60 - Math.round((a - b) / 1E3);
+		0 <= a ? $("#secField").text(a) : -3 > a && (clearInterval(myTimersecField), $(window).unbind(), $.ajax({
+			type: "POST",
+			cache: !1,
+			url: nv_base_siteurl + "index.php?" + nv_lang_variable + "=" + nv_lang_data + "&" + nv_name_variable + "=users&" + nv_fc_variable + "=logout",
+			data: "nv_ajax_login=1"
+		}).done(function(a) {
+			window.location.href = location.reload()
+		}));
+	}, 1E3)
 }
 
 function locationReplace(url) {
@@ -138,10 +141,10 @@ function tipShow(a, b, callback) {
                     var id = "recaptcha" + (new Date().getTime()) + nv_randomPassword(8);
                     var ele;
                     var btn = false, pnum = 0, btnselector = '';
-                    
+
                     $(this).remove();
                     parent.append('<div id="' + id + '" data-toggle="recaptcha"></div>');
-                    
+
                     for (i = 0, j = nv_recaptcha_elements.length; i < j; i++) {
                         ele = nv_recaptcha_elements[i];
                         if (typeof ele.pnum != "undefined" && typeof ele.btnselector != "undefined" && ele.pnum && ele.btnselector != "" && ele.id == oldID) {
@@ -188,10 +191,10 @@ function ftipShow(a, b, callback) {
                     var id = "recaptcha" + (new Date().getTime()) + nv_randomPassword(8);
                     var ele;
                     var btn = false, pnum = 0, btnselector = '';
-                    
+
                     $(this).remove();
                     parent.append('<div id="' + id + '" data-toggle="recaptcha"></div>');
-                    
+
                     for (i = 0, j = nv_recaptcha_elements.length; i < j; i++) {
                         ele = nv_recaptcha_elements[i];
                         if (typeof ele.pnum != "undefined" && typeof ele.btnselector != "undefined" && ele.pnum && ele.btnselector != "" && ele.id == oldID) {
@@ -313,10 +316,10 @@ function modalShow(a, b, callback) {
                     var id = "recaptcha" + (new Date().getTime()) + nv_randomPassword(8);
                     var ele;
                     var btn = false, pnum = 0, btnselector = '';
-                    
+
                     $(this).remove();
                     parent.append('<div id="' + id + '" data-toggle="recaptcha"></div>');
-                    
+
                     for (i = 0, j = nv_recaptcha_elements.length; i < j; i++) {
                         ele = nv_recaptcha_elements[i];
                         if (typeof ele.pnum != "undefined" && typeof ele.btnselector != "undefined" && ele.pnum && ele.btnselector != "" && ele.id == oldID) {
@@ -439,6 +442,14 @@ function showSubBreadcrumbs(a, b) {
     $(document).on("click", function() {
         $("em", a).is(".fa-angle-down") && ($("em", a).removeClass("fa-angle-down").addClass("fa-angle-right"), c.removeClass("open"));
     });
+}
+
+function add_hint(type, url) {
+	if (!type || !url) return;
+	var el = document.createElement("link");
+	el.setAttribute("rel", type);
+	el.setAttribute("href", url);
+	document.getElementsByTagName("head")[0].appendChild(el)
 }
 
 var reCaptchaLoadCallback = function() {
@@ -604,7 +615,16 @@ $(function() {
     //Change Localtion
     $("[data-location]").on("click", function() {
         locationReplace($(this).data("location"))
-    })
+    });
+    //Add preload: link rel="prefetch", link rel="prerender"
+    /*
+    $(document).bind("mousemove", function(e) {
+    	if (!e.target.href || e.target.href.indexOf(location.host) == -1 || e.target.hintAdded) return;
+        add_hint("prefetch", e.target.href);
+    	add_hint("prerender", e.target.href);
+    	e.target.hintAdded = true
+    });
+    */
 });
 // Fix bootstrap multiple modal
 $(document).on({

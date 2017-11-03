@@ -2,7 +2,7 @@
 
 /**
  * @Project NUKEVIET 4.x
- * @Author VINADES.,JSC (contact@vinades.vn)
+ * @Author VINADES.,JSC <contact@vinades.vn>
  * @Copyright (C) 2014 VINADES.,JSC. All rights reserved
  * @License GNU/GPL version 2 or any later version
  * @Createdate 2-2-2010 12:55
@@ -51,7 +51,7 @@ if ($nv_Request->isset_request('submit', 'post')) {
     if (nv_check_valid_email($site_email) == '') {
         $array_config_site['site_email'] = $site_email;
     }
-    
+
     $array_config_site['site_phone'] = nv_substr($nv_Request->get_title('site_phone', 'post', ''), 0, 20);
 
     $preg_replace = array( 'pattern' => "/[^a-z\-\_\.\,\;\:\@\/\\s]/i", 'replacement' => '' );
@@ -62,10 +62,15 @@ if ($nv_Request->isset_request('submit', 'post')) {
     if (preg_match('/[^a-zA-Z0-9\:\-\_\.]/', $array_config_site['searchEngineUniqueID'])) {
         $array_config_site['searchEngineUniqueID'] = '';
     }
-    
+
     $array_config_site['googleMapsAPI'] = $nv_Request->get_title('googleMapsAPI', 'post', '');
-    if (preg_match('/[^a-zA-Z0-9]/', $array_config_site['googleMapsAPI'])) {
-        $array_config_site['googleMapsAPI'] = 'AIzaSyC8ODAzZ75hsAufVBSffnwvKfTOT6TnnNQ';
+    if (preg_match('/[^a-zA-Z0-9\_\-]/', $array_config_site['googleMapsAPI'])) {
+        $array_config_site['googleMapsAPI'] = '';
+    }
+
+    $array_config_site['ssl_https'] = $nv_Request->get_int('ssl_https', 'post');
+    if ($array_config_site['ssl_https'] < 0 or $array_config_site['ssl_https'] > 2) {
+        $array_config_site['ssl_https'] = 0;
     }
 
     $sth = $db->prepare("UPDATE " . NV_CONFIG_GLOBALTABLE . " SET config_value = :config_value WHERE lang = 'sys' AND module = 'site' AND config_name = :config_name");
@@ -102,12 +107,6 @@ if ($nv_Request->isset_request('submit', 'post')) {
         }
         $array_config_global['my_domains'] = array_unique($array_config_global['my_domains']);
         $array_config_global['my_domains'] = implode(',', $array_config_global['my_domains']);
-
-        $array_config_global['ssl_https'] = $nv_Request->get_int('ssl_https', 'post');
-
-        if ($array_config_global['ssl_https'] < 0 or $array_config_global['ssl_https'] > 3) {
-            $array_config_global['ssl_https'] = 0;
-        }
 
         $array_config_global['gzip_method'] = $nv_Request->get_int('gzip_method', 'post');
         $array_config_global['lang_multi'] = $nv_Request->get_int('lang_multi', 'post');
@@ -178,7 +177,6 @@ if ($nv_Request->isset_request('submit', 'post')) {
             'rewrite_endurl' => $global_config['rewrite_endurl'],
             'rewrite_exturl' => $global_config['rewrite_exturl'],
             'rewrite_op_mod' => $array_config_global['rewrite_op_mod'],
-            'ssl_https' => $array_config_global['ssl_https']
         );
         $rewrite = nv_rewrite_change($array_config_rewrite);
         if (empty($rewrite[0])) {
@@ -188,8 +186,7 @@ if ($nv_Request->isset_request('submit', 'post')) {
         $nv_Cache->delAll(false);
     }
     if (empty($errormess)) {
-        Header('Location: ' . NV_BASE_ADMINURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $module_name . '&' . NV_OP_VARIABLE . '=' . $op . '&rand=' . nv_genpass());
-        exit();
+        nv_redirect_location(NV_BASE_ADMINURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $module_name . '&' . NV_OP_VARIABLE . '=' . $op . '&rand=' . nv_genpass());
     }
 }
 
@@ -203,6 +200,17 @@ $xtpl->assign('NV_NAME_VARIABLE', NV_NAME_VARIABLE);
 $xtpl->assign('MODULE_NAME', $module_name);
 $xtpl->assign('NV_OP_VARIABLE', NV_OP_VARIABLE);
 $xtpl->assign('OP', $op);
+
+for ($i = 0; $i <= 2; $i ++) {
+    $ssl_https = array(
+        'key' => $i,
+        'title' => $lang_module['ssl_https_' . $i],
+        'selected' => $i == $global_config['ssl_https'] ? ' selected="selected"' : ''
+    );
+
+    $xtpl->assign('SSL_HTTPS', $ssl_https);
+    $xtpl->parse('main.ssl_https');
+}
 
 if (defined('NV_IS_GODADMIN')) {
     $result = $db->query("SELECT config_name, config_value FROM " . NV_CONFIG_GLOBALTABLE . " WHERE lang='sys' AND module='global'");
@@ -219,17 +227,17 @@ if (defined('NV_IS_GODADMIN')) {
     $xtpl->assign('CHECKED_REWRITE_OPTIONAL', ($array_config_global['rewrite_optional'] == 1) ? ' checked ' : '');
 
     $xtpl->assign('MY_DOMAINS', $array_config_global['my_domains']);
-    
+
     foreach ($site_mods as $mod => $row) {
         $xtpl->assign('MODE_VALUE', $mod);
         $xtpl->assign('MODE_SELECTED', ($mod == $array_config_global['rewrite_op_mod']) ? "selected='selected'" : "");
         $xtpl->assign('MODE_NAME', $row['custom_title']);
         $xtpl->parse('main.system.rewrite_op_mod');
     }
-    
+
     $xtpl->assign('SHOW_REWRITE_OPTIONAL', ($lang_multi == 0 and $array_config_global['rewrite_enable']) ? '' : ' style="display:none"');
     $xtpl->assign('SHOW_REWRITE_OP_MOD', ($array_config_global['rewrite_optional'] == 1) ? '' : ' style="display:none"');
-    
+
     if (sizeof($global_config['allow_sitelangs']) > 1) {
         foreach ($allow_sitelangs as $lang_i) {
             $xtpl->assign('LANGOP', $lang_i);
@@ -257,22 +265,6 @@ if (defined('NV_IS_GODADMIN')) {
         $xtpl->assign('TIMEZONELANGVALUE', $site_timezone_i);
         $xtpl->parse('main.system.opsite_timezone');
     }
-
-    for ($i = 0; $i <= 3; $i ++) {
-        $ssl_https = array(
-            'key' => $i,
-            'title' => $lang_module['ssl_https_' . $i],
-            'selected' => $i == $array_config_global['ssl_https'] ? ' selected="selected"' : ''
-        );
-
-        $xtpl->assign('SSL_HTTPS', $ssl_https);
-        $xtpl->parse('main.system.ssl_https');
-    }
-
-    if (intval($array_config_global['ssl_https']) !== 3) {
-        $xtpl->parse('main.system.ssl_https_modules_hide');
-    }
-    $xtpl->assign('LINK_SSL_MODULES', NV_BASE_ADMINURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $module_name . '&show_ssl_modules=1');
 
     $xtpl->parse('main.system');
 }

@@ -2,7 +2,7 @@
 
 /**
  * @Project NUKEVIET 4.x
- * @Author VINADES.,JSC (contact@vinades.vn)
+ * @Author VINADES.,JSC <contact@vinades.vn>
  * @Copyright (C) 2014 VINADES.,JSC. All rights reserved
  * @License GNU/GPL version 2 or any later version
  * @Createdate 3-6-2010 0:14
@@ -25,23 +25,20 @@ if (nv_user_in_groups($global_array_cat[$catid]['groups_view'])) {
             $canonicalUrl = NV_MAIN_DOMAIN . $base_url_rewrite;
         } elseif (NV_MAIN_DOMAIN . $_SERVER['REQUEST_URI'] != $base_url_rewrite) {
             //chuyen huong neu doi alias
-            header('HTTP/1.1 301 Moved Permanently');
-            Header('Location: ' . $base_url_rewrite);
-            die();
+            nv_redirect_location($base_url_rewrite);
         } else {
             $canonicalUrl = $base_url_rewrite;
         }
         $canonicalUrl = str_replace('&', '&amp;', $canonicalUrl);
-        
-        $body_contents = $db_slave->query('SELECT titlesite, description, bodyhtml, sourcetext, imgposition, copyright, allowed_send, allowed_print, allowed_save, gid FROM ' . NV_PREFIXLANG . '_' . $module_data . '_detail where id=' . $news_contents['id'])->fetch();
+
+        $body_contents = $db_slave->query('SELECT titlesite, description, bodyhtml, sourcetext, layout_func, imgposition, copyright, allowed_send, allowed_print, allowed_save, gid FROM ' . NV_PREFIXLANG . '_' . $module_data . '_detail where id=' . $news_contents['id'])->fetch();
         $news_contents = array_merge($news_contents, $body_contents);
         unset($body_contents);
 
         if ($news_contents['external_link']) {
-            Header('Location: ' . $news_contents['sourcetext']);
-            die();
+            nv_redirect_location($news_contents['sourcetext']);
         }
-        
+
         $show_no_image = $module_config[$module_name]['show_no_image'];
 
         if (defined('NV_IS_MODADMIN') or ($news_contents['status'] == 1 and $news_contents['publtime'] < NV_CURRENTTIME and ($news_contents['exptime'] == 0 or $news_contents['exptime'] > NV_CURRENTTIME))) {
@@ -328,6 +325,9 @@ if (nv_user_in_groups($global_array_cat[$catid]['groups_view'])) {
     } else {
         $content_comment = '';
     }
+
+    // Xu ly Layout tuy chinh
+    $module_info['layout_funcs'][$op_file] = !empty($news_contents['layout_func']) ? $news_contents['layout_func'] : $module_info['layout_funcs'][$op_file];
 
     $contents = detail_theme($news_contents, $array_keyword, $related_new_array, $related_array, $topic_array, $content_comment);
     $id_profile_googleplus = $news_contents['gid'];

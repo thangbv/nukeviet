@@ -2,7 +2,7 @@
 
 /**
  * @Project NUKEVIET 4.x
- * @Author VINADES.,JSC (contact@vinades.vn)
+ * @Author VINADES.,JSC <contact@vinades.vn>
  * @Copyright (C) 2014 VINADES.,JSC. All rights reserved
  * @License GNU/GPL version 2 or any later version
  * @Createdate 31/05/2010, 00:36
@@ -31,7 +31,8 @@ if ($nv_Request->isset_request('mailer_mode', 'post')) {
 } else {
     $array_config['smtp_ssl'] = intval($global_config['smtp_ssl']);
 }
-
+$array_config['verify_peer_ssl'] = $nv_Request->get_int('verify_peer_ssl', 'post', 0);
+$array_config['verify_peer_name_ssl'] = $nv_Request->get_int('verify_peer_name_ssl', 'post', 0);
 if ($nv_Request->isset_request('mailer_mode', 'post')) {
     $smtp_password = $array_config['smtp_password'];
     $array_config['smtp_password'] = $crypt->encrypt($smtp_password);
@@ -53,8 +54,7 @@ if ($nv_Request->isset_request('mailer_mode', 'post')) {
     }
 
     if (empty($errormess)) {
-        Header('Location: ' . NV_BASE_ADMINURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $module_name . '&' . NV_OP_VARIABLE . '=' . $op . '&rand=' . nv_genpass());
-        exit();
+        nv_redirect_location(NV_BASE_ADMINURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $module_name . '&' . NV_OP_VARIABLE . '=' . $op . '&rand=' . nv_genpass());
     }
     $array_config['smtp_password'] = $smtp_password;
 }
@@ -67,6 +67,7 @@ $array_config['mailer_mode_phpmail'] = ($array_config['mailer_mode'] == '') ? ' 
 $array_config['mailer_mode_smtpt_show'] = ($array_config['mailer_mode'] == 'smtp') ? '' : ' style="display: none" ';
 
 $xtpl = new XTemplate('smtp.tpl', NV_ROOTDIR . '/themes/' . $global_config['module_theme'] . '/modules/' . $module_file);
+
 $xtpl->assign('LANG', $lang_module);
 $xtpl->assign('DATA', $array_config);
 $xtpl->assign('NV_BASE_ADMINURL', NV_BASE_ADMINURL);
@@ -74,17 +75,29 @@ $xtpl->assign('NV_NAME_VARIABLE', NV_NAME_VARIABLE);
 $xtpl->assign('MODULE_NAME', $module_name);
 $xtpl->assign('NV_OP_VARIABLE', NV_OP_VARIABLE);
 $xtpl->assign('OP', $op);
+
 foreach ($smtp_encrypted_array as $id => $value) {
     $encrypted = array(
         'id' => $id,
         'value' => $value,
-        'sl' => ($global_config['smtp_ssl'] == $id) ? ' selected="selected"' : ''
+        'sl' => ($global_config['smtp_ssl'] == $id) ? ' selected="selected"' : '',
     );
 
     $xtpl->assign('EMCRYPTED', $encrypted);
     $xtpl->parse('smtp.encrypted_connection');
 }
-
+if($global_config['verify_peer_ssl'] == 1) {
+	$xtpl->assign('PEER_SSL_YES', 'checked="checked"');
+}
+else {
+	$xtpl->assign('PEER_SSL_NO', 'checked="checked"');
+}
+if($global_config['verify_peer_name_ssl'] == 1) {
+	$xtpl->assign('PEER_NAME_SSL_YES', 'checked="checked"');
+}
+else {
+	$xtpl->assign('PEER_NAME_SSL_NO', 'checked="checked"');
+}
 if ($errormess != '') {
     $xtpl->assign('ERROR', $errormess);
     $xtpl->parse('smtp.error');

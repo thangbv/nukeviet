@@ -2,7 +2,7 @@
 
 /**
  * @Project NUKEVIET 4.x
- * @Author VINADES.,JSC (contact@vinades.vn)
+ * @Author VINADES.,JSC <contact@vinades.vn>
  * @Copyright (C) 2014 VINADES.,JSC. All rights reserved
  * @License GNU/GPL version 2 or any later version
  * @Createdate 12/29/2009 2:39
@@ -61,16 +61,13 @@ if (! empty($admin_cookie)) {
     }
 
     define('NV_IS_ADMIN', true);
-    $admin_info['in_groups'][] = 3;
 
     if ($admin_info['level'] == 1 or $admin_info['level'] == 2) {
         define('NV_IS_SPADMIN', true);
-        $admin_info['in_groups'][] = 2;
     }
 
     if ($admin_info['level'] == 1 and $global_config['idsite'] == 0) {
         define('NV_IS_GODADMIN', true);
-        $admin_info['in_groups'][] = 1;
     }
 
     if (! defined('ADMIN_LOGIN_MODE')) {
@@ -136,15 +133,15 @@ if (! empty($admin_cookie)) {
         $time_login = array();
         $time_login['showtimeoutsess'] = (NV_CURRENTTIME + 63 - $admin_info['last_online'] > $global_config['admin_check_pass_time']) ? 1 : 0;
         $time_login['check_pass_time'] = ($global_config['admin_check_pass_time'] - (NV_CURRENTTIME - $admin_info['last_online']) - 63)*1000;
-        
+
         nv_jsonOutput($time_login);
     }
-    
+
     if ($admin_info['checkpass']) {
         if ((NV_CURRENTTIME - $admin_info['last_online']) > $global_config['admin_check_pass_time']) {
             $nv_Request->unset_request('admin,online', 'session');
             if (!defined('NV_IS_AJAX')) {
-                Header('Location: ' . $client_info['selfurl']);
+                nv_redirect_location($client_info['selfurl']);
             }
             exit();
         }

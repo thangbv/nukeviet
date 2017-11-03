@@ -2,7 +2,7 @@
 
 /**
  * @Project NUKEVIET 4.x
- * @Author VINADES.,JSC (contact@vinades.vn)
+ * @Author VINADES.,JSC <contact@vinades.vn>
  * @Copyright (C) 2014 VINADES.,JSC. All rights reserved
  * @License GNU/GPL version 2 or any later version
  * @Createdate 10/03/2010 10:51
@@ -17,6 +17,7 @@ define('NV_MOD_TABLE', ($module_data == 'users') ? NV_USERS_GLOBALTABLE : $db_co
 define('NV_2STEP_VERIFICATION_MODULE', 'two-step-verification');
 
 $lang_module['in_groups'] = $lang_global['in_groups'];
+require NV_ROOTDIR . '/modules/' . $module_file . '/global.functions.php';
 
 /**
  * validUserLog()
@@ -47,8 +48,6 @@ function validUserLog($array_user, $remember, $opid, $current_mode = 0)
         'current_openid' => $opid
     );
 
-    $user = nv_base64_encode(serialize($user));
-
     $stmt = $db->prepare("UPDATE " . NV_MOD_TABLE . " SET
 		checknum = :checknum,
 		last_login = " . NV_CURRENTTIME . ",
@@ -65,8 +64,8 @@ function validUserLog($array_user, $remember, $opid, $current_mode = 0)
     $stmt->execute();
     $live_cookie_time = ($remember) ? NV_LIVE_COOKIE_TIME : 0;
 
-    $nv_Request->set_Cookie('nvloginhash', $user, $live_cookie_time);
-    
+    $nv_Request->set_Cookie('nvloginhash', serialize($user), $live_cookie_time);
+
     if (!empty($global_users_config['active_user_logs'])) {
         $log_message = $opid ? ($lang_module['userloginviaopt'] . ' ' . $opid) : $lang_module['st_login'];
         nv_insert_logs(NV_LANG_DATA, $module_name, '[' . $array_user['username'] . '] ' . $log_message, ' Client IP:' . NV_CLIENT_IP, 0);
@@ -81,7 +80,7 @@ function validUserLog($array_user, $remember, $opid, $current_mode = 0)
  */
 function nv_del_user($userid)
 {
-    global $db, $global_config, $nv_Request, $module_name, $user_info, $lang_module;
+    global $db, $global_config, $module_name, $user_info, $lang_module;
 
     $sql = 'SELECT group_id, username, first_name, last_name, email, photo, in_groups, idsite FROM ' . NV_MOD_TABLE . ' WHERE userid=' . $userid;
     $row = $db->query($sql)->fetch(3);
@@ -171,7 +170,7 @@ if (defined('NV_IS_USER') and isset($array_op[0]) and isset($array_op[1]) and ($
                 if ($group['config']['access_editus'] and $array_op[0] == 'editinfo') { // sửa thông tin
                     $group_id = $row['group_id'];
 
-                    $result = $db->query('SELECT group_id FROM ' . NV_MOD_TABLE . '_groups_users 
+                    $result = $db->query('SELECT group_id FROM ' . NV_MOD_TABLE . '_groups_users
 						WHERE group_id = ' . $group_id . ' and userid = ' . $array_op[2] . ' and is_leader = 0');
 
                     if ($row = $result->fetch()) { // nếu tài khoản nằm trong nhóm đó thì được quyền sửa

@@ -2,7 +2,7 @@
 
 /**
  * @Project NUKEVIET 4.x
- * @Author VINADES.,JSC (contact@vinades.vn)
+ * @Author VINADES.,JSC <contact@vinades.vn>
  * @Copyright (C) 2014 VINADES.,JSC. All rights reserved
  * @License GNU/GPL version 2 or any later version
  * @Createdate 3-6-2010 0:14
@@ -30,8 +30,7 @@ if (isset($array_op[1])) {
         }
         $base_url_rewrite = nv_url_rewrite($base_url_rewrite, true);
         if ($_SERVER['REQUEST_URI'] != $base_url_rewrite and NV_MAIN_DOMAIN . $_SERVER['REQUEST_URI'] != $base_url_rewrite) {
-            Header('Location: ' . $base_url_rewrite);
-            die();
+            nv_redirect_location($base_url_rewrite);
         }
 
         $array_mod_title[] = array(
@@ -88,7 +87,7 @@ if (isset($array_op[1])) {
         $item_array_other = array();
         if ($st_links > 0) {
             $db_slave->sqlreset()
-                ->select('t1.id, t1.catid, t1.addtime, t1.edittime, t1.publtime, t1.title, t1.alias, t1.hitstotal')
+                ->select('t1.id, t1.catid, t1.addtime, t1.edittime, t1.publtime, t1.title, t1.alias, t1.hitstotal, t1.external_link')
                 ->from(NV_PREFIXLANG . '_' . $module_data . '_rows t1')
                 ->join('INNER JOIN ' . NV_PREFIXLANG . '_' . $module_data . '_block t2 ON t1.id = t2.id')
                 ->where('t2.bid= ' . $bid . ' AND t2.weight > ' . $end_weight)

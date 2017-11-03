@@ -2,7 +2,7 @@
 
 /**
  * @Project NUKEVIET 4.x
- * @Author VINADES.,JSC (contact@vinades.vn)
+ * @Author VINADES.,JSC <contact@vinades.vn>
  * @Copyright (C) 2014 VINADES.,JSC. All rights reserved
  * @Language Tiếng Việt
  * @License CC BY-SA (http://creativecommons.org/licenses/by-sa/4.0/)
@@ -13,7 +13,7 @@ if (!defined('NV_ADMIN') or !defined('NV_MAINFILE')) {
     die('Stop!!!');
 }
 
-$lang_translator['author'] = 'VINADES.,JSC (contact@vinades.vn)';
+$lang_translator['author'] = 'VINADES.,JSC <contact@vinades.vn>';
 $lang_translator['createdate'] = '04/03/2010, 15:22';
 $lang_translator['copyright'] = '@Copyright (C) 2012 VINADES.,JSC. All rights reserved';
 $lang_translator['info'] = '';
@@ -38,6 +38,7 @@ $lang_module['disable_content'] = 'Nội dung thông báo site ngưng hoạt đ�
 $lang_module['submit'] = 'Lưu cấu hình';
 $lang_module['err_writable'] = 'Lỗi hệ thống không ghi được file: %s bạn cần cấu hình server cho phép ghi file này.';
 $lang_module['err_supports_rewrite'] = 'Lỗi, Máy chủ của bạn không hỗ trợ module rewrite';
+$lang_module['err_save_sysconfig'] = 'Các thay đổi đã được lưu lại tuy nhiên hệ thống không ghi được cấu hình ra file. Hãy cấp quyền ghi cho file %s sau đó thực hiện lại';
 
 $lang_module['security'] = 'Thiết lập an ninh';
 $lang_module['is_flood_blocker'] = 'Kích hoạt tính năng chống flood';
@@ -82,6 +83,10 @@ $lang_module['type_linux'] = 'Linux Mail';
 $lang_module['type_phpmail'] = 'PHPmail';
 $lang_module['smtp_server'] = 'Cấu hình máy chủ gửi mail';
 $lang_module['incoming_ssl'] = 'Sử dụng Xác thực';
+$lang_module['verify_peer_ssl'] = 'Ssl verify peer';
+$lang_module['verify_peer_ssl_yes'] = 'Có';
+$lang_module['verify_peer_ssl_no'] = 'Không';
+$lang_module['verify_peer_name_ssl'] = 'Ssl verify name peer';
 $lang_module['outgoing'] = 'Máy chủ (SMTP) Thư Gửi đi';
 $lang_module['outgoing_port'] = 'Cổng gửi mail';
 $lang_module['smtp_username'] = 'Tài khoản gửi mail';
@@ -210,9 +215,7 @@ $lang_module['ssl_https_module'] = 'Các module kích hoạt SSL';
 $lang_module['ssl_https_0'] = 'Tắt SSL';
 $lang_module['ssl_https_1'] = 'Kích hoạt toàn site';
 $lang_module['ssl_https_2'] = 'Kích hoạt khu vực admin';
-$lang_module['ssl_https_3'] = 'Kích hoạt tại các module được chọn';
 $lang_module['note_ssl'] = 'Bạn có chắc chắn site bạn hỗ trợ https không? Nếu không hỗ trợ sẽ không truy cập được các khu vực tương ứng sau khi lưu?';
-$lang_module['note_ssl_modules'] = 'Mỗi ngôn ngữ sẽ có các module khác nhau, nhấp vào đây để chọn các module';
 $lang_module['timezoneAuto'] = 'Theo máy tính của khách truy cập';
 $lang_module['timezoneByCountry'] = 'Theo quốc gia của khách truy cập';
 $lang_module['allow_switch_mobi_des'] = 'Cho phép chuyển đổi giao diện mobile, desktop';
@@ -231,6 +234,7 @@ $lang_module['plugin_area'] = 'Khu vực';
 $lang_module['plugin_area_1'] = 'Trước khi kết nối CSDL';
 $lang_module['plugin_area_2'] = 'Trước khi gọi các module';
 $lang_module['plugin_area_3'] = 'Trước khi website gửi nội dung tới trình duyệt';
+$lang_module['plugin_area_4'] = 'Sau khi gọi các module';
 $lang_module['plugin_number'] = 'Số thứ tự';
 $lang_module['plugin_func'] = 'Chức năng';
 $lang_module['plugin_add'] = 'Thêm plugin';
@@ -252,9 +256,8 @@ $lang_module['two_step_verification0'] = 'Không yêu cầu';
 $lang_module['two_step_verification1'] = 'Khu vực quản trị';
 $lang_module['two_step_verification2'] = 'Khu vực ngoài site';
 $lang_module['two_step_verification3'] = 'Tất cả các khu vực';
+$lang_module['two_step_verification_note'] = 'Chú ý: Cấu hình này áp dụng cho toàn bộ tài khoản của các nhóm, nếu cần cấu hình riêng cho từng nhóm hãy chọn giá trị này là <strong>%s</strong> sau đó sửa <a href="%s">nhóm</a> rồi chọn khu vực bắt buộc kích hoạt xác thực hai bước theo ý muốn';
 
 $lang_module['site_phone'] = 'Số điện thoại của site';
 $lang_module['googleMapsAPI'] = 'Google Maps API key';
 $lang_module['googleMapsAPI_guide'] = '<a href="https://wiki.nukeviet.vn/google:api:creat-google-map-apikey" target="_blank">Hướng dẫn lấy Google Maps API key</a>';
-
-

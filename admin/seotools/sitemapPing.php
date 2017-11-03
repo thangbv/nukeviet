@@ -2,7 +2,7 @@
 
 /**
  * @Project NUKEVIET 4.x
- * @Author VINADES.,JSC (contact@vinades.vn)
+ * @Author VINADES.,JSC <contact@vinades.vn>
  * @Copyright (C) 2014 VINADES.,JSC. All rights reserved
  * @License GNU/GPL version 2 or any later version
  * @Createdate 5/12/2010, 1:34
@@ -21,7 +21,7 @@ if (! defined('NV_IS_FILE_SEOTOOLS')) {
  */
 function nv_sitemapPing($module, $link)
 {
-    global $sys_info, $lang_module;
+    global $sys_info, $lang_module, $global_config;
 
     $md5 = md5($link . $module . NV_LANG_DATA);
     $cacheFile = NV_ROOTDIR . '/' . NV_CACHEDIR . '/sitemapPing_' . $md5 . '.cache';

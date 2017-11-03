@@ -2,7 +2,7 @@
 
 /**
  * @Project NUKEVIET 4.x
- * @Author VINADES.,JSC (contact@vinades.vn)
+ * @Author VINADES.,JSC <contact@vinades.vn>
  * @Copyright (C) 2014 VINADES.,JSC. All rights reserved
  * @License GNU/GPL version 2 or any later version
  * @Createdate 12/31/2009 0:51
@@ -20,7 +20,7 @@ if (! defined('NV_IS_MOD_VOTING')) {
  */
 function voting_result($voting)
 {
-    global $module_info, $global_config;
+    global $module_info;
 
     $xtpl = new XTemplate('result.voting.tpl', NV_ROOTDIR . '/themes/' . $module_info['template'] . '/modules/' . $module_info['module_theme']);
     $xtpl->assign('PUBLTIME', $voting['pubtime']);

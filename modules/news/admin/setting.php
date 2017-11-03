@@ -2,7 +2,7 @@
 
 /**
  * @Project NUKEVIET 4.x
- * @Author VINADES.,JSC (contact@vinades.vn)
+ * @Author VINADES.,JSC <contact@vinades.vn>
  * @Copyright (C) 2014 VINADES.,JSC. All rights reserved
  * @License GNU/GPL version 2 or any later version
  * @Createdate 2-9-2010 14:43
@@ -48,7 +48,8 @@ if (!empty($savesetting)) {
     $array_config['tags_alias'] = $nv_Request->get_int('tags_alias', 'post', 0);
     $array_config['auto_tags'] = $nv_Request->get_int('auto_tags', 'post', 0);
     $array_config['tags_remind'] = $nv_Request->get_int('tags_remind', 'post', 0);
-	$array_config['copy_news'] = $nv_Request->get_int('copy_news', 'post', 0);
+    $array_config['copy_news'] = $nv_Request->get_int('copy_news', 'post', 0);
+    $array_config['order_articles'] = $nv_Request->get_int('order_articles', 'post', 0);
 
     $array_config['elas_use'] = $nv_Request->get_int('elas_use', 'post', 0);
     $array_config['elas_host'] = $nv_Request->get_title('elas_host', 'post', '');
@@ -95,8 +96,7 @@ if (!empty($savesetting)) {
 
         $nv_Cache->delMod('settings');
         $nv_Cache->delMod($module_name);
-        Header('Location: ' . NV_BASE_ADMINURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $module_name . '&' . NV_OP_VARIABLE . '=' . $op . '&rand=' . nv_genpass());
-        die();
+        nv_redirect_location(NV_BASE_ADMINURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $module_name . '&' . NV_OP_VARIABLE . '=' . $op . '&rand=' . nv_genpass());
     }
 
 }
@@ -188,6 +188,9 @@ $xtpl->assign('INSTANT_ARTICLES_ACTIVE', $module_config[$module_name]['instant_a
 $xtpl->assign('INSTANT_ARTICLES_HTTPAUTH', $module_config[$module_name]['instant_articles_httpauth'] ? ' checked="checked"' : '');
 $xtpl->assign('INSTANT_ARTICLES_AUTO', $module_config[$module_name]['instant_articles_auto'] ? ' checked="checked"' : '');
 
+$xtpl->assign('FRONTEND_EDIT_ALIAS', $module_config[$module_name]['frontend_edit_alias'] ? ' checked="checked"' : '');
+$xtpl->assign('FRONTEND_EDIT_LAYOUT', $module_config[$module_name]['frontend_edit_layout'] ? ' checked="checked"' : '');
+
 if (!empty($module_config[$module_name]['instant_articles_password'])) {
     $xtpl->assign('INSTANT_ARTICLES_PASSWORD', $crypt->decrypt($module_config[$module_name]['instant_articles_password']));
 } else {
@@ -221,6 +224,15 @@ foreach ($array_structure_image as $type => $dir) {
     $xtpl->parse('main.structure_upload');
 }
 
+for ($i = 0; $i < 2; $i++) {
+    $xtpl->assign('ORDER_ARTICLES', array(
+        'key' => $i,
+        'title' => $lang_module['order_articles_' . $i],
+        'selected' => $i == $module_config[$module_name]['order_articles'] ? ' selected="selected"' : ''
+    ));
+    $xtpl->parse('main.order_articles');
+}
+
 // Cau hinh hien thi nguon tin
 $array_config_source = array(
     0 => $lang_module['config_source_title'],
@@ -243,8 +255,8 @@ $array_imgposition = array(
     2 => $lang_module['imgposition_2']
 );
 
-// position images
-while (list ($id_imgposition, $title_imgposition) = each($array_imgposition)) {
+// Position images
+foreach ($array_imgposition as $id_imgposition => $title_imgposition) {
     $sl = ($id_imgposition == $module_config[$module_name]['imgposition']) ? ' selected="selected"' : '';
     $xtpl->assign('id_imgposition', $id_imgposition);
     $xtpl->assign('title_imgposition', $title_imgposition);
@@ -266,7 +278,7 @@ $xtpl->assign('CURRENTPATH', defined('NV_IS_SPADMIN') ? "images" : NV_UPLOADS_DI
 
 if (defined('NV_IS_ADMIN_FULL_MODULE') or !in_array('admins', $allow_func)) {
     $groups_list = nv_groups_list();
-    unset($groups_list[6]);
+    unset($groups_list[1], $groups_list[2], $groups_list[3], $groups_list[6]);
 
     $savepost = $nv_Request->get_int('savepost', 'post', 0);
     if (!empty($savepost)) {
@@ -276,6 +288,18 @@ if (defined('NV_IS_ADMIN_FULL_MODULE') or !in_array('admins', $allow_func)) {
         $array_postcontent = $nv_Request->get_typed_array('array_postcontent', 'post', 'int', array());
         $array_editcontent = $nv_Request->get_typed_array('array_editcontent', 'post', 'int', array());
         $array_delcontent = $nv_Request->get_typed_array('array_delcontent', 'post', 'int', array());
+
+
+        $array_config['frontend_edit_alias'] = $nv_Request->get_int('frontend_edit_alias', 'post', 0);
+        $array_config['frontend_edit_layout'] = $nv_Request->get_int('frontend_edit_layout', 'post', 0);
+
+        $sth = $db->prepare("UPDATE " . NV_CONFIG_GLOBALTABLE . " SET config_value = :config_value WHERE lang = '" . NV_LANG_DATA . "' AND module = :module_name AND config_name = :config_name");
+        $sth->bindParam(':module_name', $module_name, PDO::PARAM_STR);
+        foreach ($array_config as $config_name => $config_value) {
+            $sth->bindParam(':config_name', $config_name, PDO::PARAM_STR);
+            $sth->bindParam(':config_value', $config_value, PDO::PARAM_STR);
+            $sth->execute();
+        }
 
         foreach ($array_group_id as $group_id) {
             if (isset($groups_list[$group_id])) {
@@ -290,8 +314,7 @@ if (defined('NV_IS_ADMIN_FULL_MODULE') or !in_array('admins', $allow_func)) {
 
         $nv_Cache->delMod('settings');
         $nv_Cache->delMod($module_name);
-        Header('Location: ' . NV_BASE_ADMINURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $module_name . '&' . NV_OP_VARIABLE . '=' . $op . '&rand=' . nv_genpass());
-        die();
+        nv_redirect_location(NV_BASE_ADMINURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $module_name . '&' . NV_OP_VARIABLE . '=' . $op . '&rand=' . nv_genpass());
     }
 
     $array_post_data = array();

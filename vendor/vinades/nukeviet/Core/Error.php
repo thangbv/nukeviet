@@ -2,7 +2,7 @@
 
 /**
  * @Project NUKEVIET 4.x
- * @Author VINADES.,JSC (contact@vinades.vn)
+ * @Author VINADES.,JSC <contact@vinades.vn>
  * @Copyright (C) 2014 VINADES.,JSC. All rights reserved
  * @License GNU/GPL version 2 or any later version
  * @Createdate 4/10/2010 19:43
@@ -11,26 +11,25 @@
 namespace NukeViet\Core;
 
 if (!defined('E_STRICT')) {
-    define('E_STRICT', 2048);
-} //khong sua
+    define('E_STRICT', 2048); //khong sua
+}
 if (!defined('E_RECOVERABLE_ERROR')) {
-    define('E_RECOVERABLE_ERROR', 4096);
-} //khong sua
+    define('E_RECOVERABLE_ERROR', 4096); //khong sua
+}
 if (!defined('E_DEPRECATED')) {
-    define('E_DEPRECATED', 8192);
-} //khong sua
+    define('E_DEPRECATED', 8192); //khong sua
+}
 if (!defined('E_USER_DEPRECATED')) {
-    define('E_USER_DEPRECATED', 16384);
-} //khong sua
+    define('E_USER_DEPRECATED', 16384); //khong sua
+}
 
 class Error
 {
     const INCORRECT_IP = 'Incorrect IP address specified';
     const LOG_FILE_NAME_DEFAULT = 'error_log'; //ten file log
     const LOG_FILE_EXT_DEFAULT = 'log'; //duoi file log
-    
+
     private $log_errors_list;
-    private $site_logo = 'assets/images/logo.png';
     private $display_errors_list;
     private $send_errors_list;
     private $error_send_mail;
@@ -45,6 +44,7 @@ class Error
     private $errfile = false;
     private $errline = false;
     private $ip = false;
+    private $server_name = false;
     private $useragent = false;
     private $request = false;
     private $day;
@@ -97,9 +97,6 @@ class Error
         $this->error_log_path = $this->get_error_log_path((string )$config['error_log_path']);
         $this->error_send_mail = (string )$config['error_send_email'];
         $this->error_set_logs = $config['error_set_logs'];
-        if (!empty($config['site_logo'])) {
-            $this->site_logo = $config['site_logo'];
-        }
 
         if (isset($config['error_log_filename']) and preg_match('/[a-z0-9\_]+/i', $config['error_log_filename'])) {
             $this->error_log_filename = $config['error_log_filename'];
@@ -117,6 +114,8 @@ class Error
         $this->month = date('m-Y', NV_CURRENTTIME);
 
         $ip = $this->get_Env('REMOTE_ADDR');
+        $this->ip = $ip;
+
         if (preg_match('#^(?:(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(?:\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$#', $ip)) {
             $ip2long = ip2long($ip);
         } else {
@@ -130,11 +129,10 @@ class Error
             }
             $ip2long = base_convert($r_ip, 2, 10);
         }
-
-        if ($ip2long === -1 and $ip2long === false) {
-            die(Error::INCORRECT_IP);
+        if ($ip2long === -1 or $ip2long === false) {
+            exit(Error::INCORRECT_IP);
         }
-        $this->ip = $ip;
+
         $request = $this->get_request();
         if (!empty($request)) {
             $this->request = substr($request, 500);
@@ -145,30 +143,8 @@ class Error
             $this->useragent = substr($useragent, 0, 500);
         }
 
-        $this->nv_set_ini();
-
         set_error_handler(array(&$this, 'error_handler'));
         register_shutdown_function(array(&$this, 'shutdown'));
-    }
-
-    /**
-     * Error::nv_set_ini()
-     *
-     * @return
-     */
-    public function nv_set_ini()
-    {
-        $disable_functions = (ini_get('disable_functions') != '' and ini_get('disable_functions') != false) ? array_map('trim', preg_split("/[\s,]+/", ini_get('disable_functions'))) : array();
-        if (extension_loaded('suhosin')) {
-            $disable_functions = array_merge($disable_functions, array_map('trim', preg_split("/[\s,]+/", ini_get('suhosin.executor.func.blacklist'))));
-        }
-        if ((function_exists('ini_set') and !in_array('ini_set', $disable_functions))) {
-            ini_set('display_startup_errors', 0);
-            ini_set('track_errors', 1);
-
-            ini_set('log_errors', 0);
-            ini_set('display_errors', 0);
-        }
     }
 
     /**
@@ -268,7 +244,7 @@ class Error
 
     /**
      * Error::get_request()
-     * 
+     *
      * @return
      */
     public function get_request()
@@ -293,7 +269,7 @@ class Error
 
     /**
      * Error::fixQuery()
-     * 
+     *
      * @param mixed $key
      * @param mixed $value
      * @return
@@ -322,7 +298,7 @@ class Error
 
     /**
      * Error::info_die()
-     * 
+     *
      * @return void
      */
     private function info_die()
@@ -359,34 +335,40 @@ class Error
             $strEncodedEmail .= "&#" . ord(substr($this->error_send_mail, $i)) . ";";
         }
 
-        $size = @getimagesize(NV_ROOTDIR . '/' . $this->site_logo);
-        echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"\n";
-        echo "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n";
-        echo "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n";
-        echo "<head>\n";
-        echo "	<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />\n";
-        echo "	<meta http-equiv=\"expires\" content=\"0\" />\n";
-        echo "<title>" . $this->errortype[$this->errno] . "</title>\n";
-        echo "</head>\n\n";
-        echo "<body>\n";
-        echo "	<div style=\"width: 400px; margin-right: auto; margin-left: auto; margin-top: 20px; margin-bottom: 20px; color: #dd3e31; text-align: center;\"><span style=\"font-weight: bold;\">" . $this->errortype[$this->errno] . "</span><br />\n";
-        echo "	<span style=\"color: #1a264e;font-weight: bold;\">" . $this->errstr . "</span><br />\n";
-        echo "	<span style=\"color: #1a264e;\">(Code: " . $error_code2 . ")</span></div>\n";
-        echo "	<div style=\"width: 400px; margin-right: auto; margin-left: auto;text-align:center\">\n";
-        echo "	If you have any questions about this site,<br />please <a href=\"mailto:" . $strEncodedEmail . "\">contact</a> the site administrator for more information</div>\n";
-        echo "</body>\n";
-        echo "</html>";
-        die();
+        header('Content-Type: text/html; charset=utf-8');
+        if (defined('NV_ADMIN') or !defined('NV_ANTI_IFRAME') or NV_ANTI_IFRAME != 0) {
+            Header('X-Frame-Options: SAMEORIGIN');
+        }
+        header('X-Content-Type-Options: nosniff');
+        header('X-XSS-Protection: 1; mode=block');
+
+        $_info = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"\n";
+        $_info .= "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n";
+        $_info .= "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n";
+        $_info .= "<head>\n";
+        $_info .= "	<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />\n";
+        $_info .= "	<meta http-equiv=\"expires\" content=\"0\" />\n";
+        $_info .= "<title>" . $this->errortype[$this->errno] . "</title>\n";
+        $_info .= "</head>\n\n";
+        $_info .= "<body>\n";
+        $_info .= "	<div style=\"width: 400px; margin-right: auto; margin-left: auto; margin-top: 20px; margin-bottom: 20px; color: #dd3e31; text-align: center;\"><span style=\"font-weight: bold;\">" . $this->errortype[$this->errno] . "</span><br />\n";
+        $_info .= "	<span style=\"color: #1a264e;font-weight: bold;\">" . $this->errstr . "</span><br />\n";
+        $_info .= "	<span style=\"color: #1a264e;\">(Code: " . $error_code2 . ")</span></div>\n";
+        $_info .= "	<div style=\"width: 400px; margin-right: auto; margin-left: auto;text-align:center\">\n";
+        $_info .= "	If you have any questions about this site,<br />please <a href=\"mailto:" . $strEncodedEmail . "\">contact</a> the site administrator for more information</div>\n";
+        $_info .= "</body>\n";
+        $_info .= "</html>";
+        exit($_info);
     }
 
     /**
      * Error::_log()
-     * 
+     *
      * @return void
      */
     private function _log()
     {
-        $content = '[' . $this->error_date . ']';
+        $content = '[' . $this->error_date . '] [' . $this->get_server_name() . ']';
         if (!empty($this->ip)) {
             $content .= ' [' . $this->ip . ']';
         }
@@ -407,7 +389,7 @@ class Error
 
     /**
      * Error::_send()
-     * 
+     *
      * @return void
      */
     private function _send()
@@ -436,13 +418,13 @@ class Error
 
     /**
      * Error::_display()
-     * 
+     *
      * @return void
      */
     private function _display()
     {
         global $error_info;
-        
+
         $display = true;
         foreach ($this->error_excluded as $pattern) {
             if (preg_match($pattern, $this->errstr)) {
@@ -450,7 +432,7 @@ class Error
                 break;
             }
         }
-        
+
         if ($display) {
             $info = $this->errstr;
             if ($this->errno != E_USER_ERROR and $this->errno != E_USER_WARNING and $this->errno != E_USER_NOTICE) {
@@ -461,7 +443,7 @@ class Error
                     $info .= ' on line ' . $this->errline;
                 }
             }
-    
+
             $error_info[] = array('errno' => $this->errno, 'info' => $info);
         }
     }
@@ -479,16 +461,16 @@ class Error
     {
         $this->errno = $errno;
         $this->errstr = $errstr;
-        
+
         if (!empty($errfile)) {
             $this->errfile = str_replace(NV_ROOTDIR, '', str_replace('\\', '/', $errfile));
         }
         if (!empty($errline)) {
             $this->errline = $errline;
         }
-        
+
         $this->log_control();
-        
+
         if ($this->errno == 256) {
             $this->info_die();
         }
@@ -496,7 +478,7 @@ class Error
 
     /**
      * Error::shutdown()
-     * 
+     *
      * @return void
      */
     public function shutdown()
@@ -526,9 +508,9 @@ class Error
                     break;
                 }
             }
-            
+
             $this->log_control();
-            
+
             // Only display some track fatal error!
             if ($finded_track) {
                 $this->info_die();
@@ -540,7 +522,7 @@ class Error
 
     /**
      * Error::fix_path()
-     * 
+     *
      * @param mixed $path
      * @return
      */
@@ -551,7 +533,7 @@ class Error
 
     /**
      * Error::get_fixed_path()
-     * 
+     *
      * @param mixed $realpath
      * @return
      */
@@ -562,7 +544,7 @@ class Error
 
     /**
      * Error::log_control()
-     * 
+     *
      * @return void
      */
     private function log_control()
@@ -571,7 +553,7 @@ class Error
         $track_errors = $this->error_log_tmp . '/' . $track_errors . '.' . $this->error_log_fileext;
 
         if ($this->error_set_logs and !file_exists($track_errors)) {
-            //file_put_contents($track_errors, '', FILE_APPEND);
+            file_put_contents($track_errors, '', FILE_APPEND);
 
             if (!empty($this->log_errors_list) and isset($this->log_errors_list[$this->errno])) {
                 $this->_log();
@@ -585,5 +567,22 @@ class Error
                 $this->_display();
             }
         }
+    }
+
+    /**
+     * Error::get_server_name()
+     *
+     * @return void
+     */
+    private function get_server_name()
+    {
+        if ($this->server_name != false) {
+            return $this->server_name;
+        }
+        $server_name = trim((isset($_SERVER['HTTP_HOST']) and !empty($_SERVER['HTTP_HOST'])) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME']);
+        $server_name = preg_replace('/^[a-z]+\:\/\//i', '', $server_name);
+        $server_name = preg_replace('/(\:[0-9]+)$/', '', $server_name);
+        $this->server_name = $server_name;
+        return $server_name;
     }
 }

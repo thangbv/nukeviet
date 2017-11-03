@@ -62,10 +62,12 @@ $lang_module['config'] = 'Config';
 $lang_module['config_view_type'] = 'Display articles type';
 $lang_module['config_view_type_0'] = 'Main article';
 $lang_module['config_view_type_1'] = 'List article';
+$lang_module['config_view_type_2'] = 'No display';
 $lang_module['config_view_type_page'] = 'Number of posts displayed on a page';
 $lang_module['config_view_related_articles'] = 'Number of posts related articles';
 $lang_module['config_facebookapi'] = 'Facebook App ID';
 $lang_module['config_facebookapi_note'] = '(Form: 1419186468293063, <a href="http://wiki.nukeviet.vn/nukeviet:admin:news:facebookapi" target="_blank">view detail</a>)';
+$lang_module['config_alias_lower'] = 'Alias auto lower string';
 $lang_module['config_save'] = 'Save config';
 
 $lang_module['setting_copy_page'] = 'Allowed to copy the article';

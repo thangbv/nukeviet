@@ -20,7 +20,10 @@
             <!-- BEGIN: recaptcha -->
             <div class="form-group">
                 <div class="middle text-right clearfix">
-                    <div class="nv-recaptcha-default"><div id="{RECAPTCHA_ELEMENT}"></div></div>
+                    <div class="nv-recaptcha-default">
+                        <div id="{RECAPTCHA_ELEMENT}"></div>
+                        <input type="hidden" value="" name="gcaptcha_session"/>
+                    </div>
                     <script type="text/javascript">
                     nv_recaptcha_elements.push({
                         id: "{RECAPTCHA_ELEMENT}",
@@ -45,7 +48,7 @@
             <div class="form-group">
                 <div class="input-group">
                     <span class="input-group-addon"><em class="fa fa-shield fa-lg"></em></span>
-                    <input type="text" class="form-control" placeholder="{LANG.lostpass_key}" value="" name="verifykey" maxlength="10" data-pattern="/^[A-Z0-9]{10,10}$/" onkeypress="validErrorHidden(this);" data-mess="{LANG.lostpass_active_error}">
+                    <input type="text" class="form-control" placeholder="{LANG.lostpass_key}" value="" name="verifykey" maxlength="10" data-pattern="/^[a-zA-Z0-9]{10,10}$/" onkeypress="validErrorHidden(this);" data-mess="{LANG.lostpass_active_error}">
                 </div>
             </div>
         </div>
@@ -54,14 +57,14 @@
             <div class="form-group">
                 <div class="input-group">
                     <span class="input-group-addon"><em class="fa fa-key fa-lg fa-fix"></em></span>
-                    <input type="password" class="form-control" placeholder="{LANG.pass_new}" value="" name="new_password" maxlength="100" data-pattern="/^(.){3,}$/" onkeypress="validErrorHidden(this);" data-mess="{GLANG.password_empty}">
+                    <input type="password" autocomplete="off" class="form-control" placeholder="{LANG.pass_new}" value="" name="new_password" maxlength="100" data-pattern="/^(.){3,}$/" onkeypress="validErrorHidden(this);" data-mess="{GLANG.password_empty}">
                 </div>
             </div>
             
             <div class="form-group">
                 <div class="input-group">
                     <span class="input-group-addon"><em class="fa fa-key fa-lg fa-fix"></em></span>
-                    <input type="password" class="form-control" placeholder="{LANG.pass_new_re}" value="" name="re_password" maxlength="100" data-pattern="/^(.){3,}$/" onkeypress="validErrorHidden(this);" data-mess="{GLANG.passwordsincorrect}">
+                    <input type="password" autocomplete="off" class="form-control" placeholder="{LANG.pass_new_re}" value="" name="re_password" maxlength="100" data-pattern="/^(.){3,}$/" onkeypress="validErrorHidden(this);" data-mess="{GLANG.passwordsincorrect}">
                 </div>
             </div>
         </div>

@@ -146,24 +146,26 @@
                     <td><input name="is_user_forum" value="1" type="checkbox"{DATA.is_user_forum} /></td>
                 </tr>
                 <!-- END: user_forum -->
+                <!-- BEGIN: dir_forum -->
                 <tr>
                     <td>{LANG.dir_forum}</td>
                     <td>
                         <select class="form-control w200" name="dir_forum">
                             <option value="">&nbsp;</option>
-                            <!-- BEGIN: dir_forum -->
+                            <!-- BEGIN: loop -->
                             <option value="{DIR_FORUM.id}"{DIR_FORUM.select}> {DIR_FORUM.value}</option>
-                            <!-- END: dir_forum -->
+                            <!-- END: loop -->
                         </select>
                     </td>
                 </tr>
+                <!-- END: dir_forum -->
                 <tr>
                     <td>{LANG.whoviewlistuser}</td>
                     <td>
                         <div class="clearfix group-allow-area">
                             <!-- BEGIN: whoviewlistuser -->
                             <p>
-                                <input type="checkbox" id="whoviewuser{WHOVIEW.key}" name="whoviewuser[]" value="{WHOVIEW.key}"{WHOVIEW.checked}/> 
+                                <input type="checkbox" id="whoviewuser{WHOVIEW.key}" name="whoviewuser[]" value="{WHOVIEW.key}"{WHOVIEW.checked}/>
                                 <label for="whoviewuser{WHOVIEW.key}">{WHOVIEW.title}</label>
                             </p>
                             <!-- END: whoviewlistuser -->
@@ -181,6 +183,10 @@
                 <tr>
                     <td>{LANG.allow_login}</td>
                     <td><input name="allowuserlogin" value="1" type="checkbox"{DATA.allowuserlogin} /></td>
+                </tr>
+                <tr>
+                    <td>{LANG.min_old_user}</td>
+                    <td><input class="form-control pull-left"  name="min_old_user" value="{DATA.min_old_user}" type="text" style="width: 50px" /></td>
                 </tr>
                 <!-- BEGIN: active_user_logs -->
                 <tr>
@@ -230,7 +236,7 @@
                         </select>
                     </td>
                 </tr>
-                <!-- BEGIN: deny_config -->         
+                <!-- BEGIN: deny_config -->
                 <tr>
                     <td>{LANG.deny_email}</td>
                     <td><textarea name="deny_email" rows="7" cols="70" class="form-control">{DATA.deny_email}</textarea></td>

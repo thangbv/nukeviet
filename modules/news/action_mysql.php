@@ -61,7 +61,6 @@ $sql_create_module[] = "CREATE TABLE " . $db_config['prefix'] . "_" . $lang . "_
 	  viewcat varchar(50) NOT NULL DEFAULT 'viewcat_page_new',
 	  numsubcat smallint(5) NOT NULL DEFAULT '0',
 	  subcatid varchar(255) DEFAULT '',
-	  inhome tinyint(1) unsigned NOT NULL DEFAULT '0',
 	  numlinks tinyint(2) unsigned NOT NULL DEFAULT '3',
 	  newday tinyint(2) unsigned NOT NULL DEFAULT '2',
 	  featured int(11) NOT NULL DEFAULT '0',
@@ -71,9 +70,11 @@ $sql_create_module[] = "CREATE TABLE " . $db_config['prefix'] . "_" . $lang . "_
 	  add_time int(11) unsigned NOT NULL DEFAULT '0',
 	  edit_time int(11) unsigned NOT NULL DEFAULT '0',
 	  groups_view varchar(255) DEFAULT '',
+      status smallint(4) NOT NULL DEFAULT '1',
 	  PRIMARY KEY (catid),
 	  UNIQUE KEY alias (alias),
-	  KEY parentid (parentid)
+	  KEY parentid (parentid),
+	  KEY status (status)
 	) ENGINE=MyISAM";
 
 $sql_create_module[] = "CREATE TABLE " . $db_config['prefix'] . "_" . $lang . "_" . $module_data . "_sources (
@@ -138,6 +139,7 @@ $sql_create_module[] = "CREATE TABLE " . $db_config['prefix'] . "_" . $lang . "_
 	 addtime int(11) unsigned NOT NULL default '0',
 	 edittime int(11) unsigned NOT NULL default '0',
 	 status tinyint(4) NOT NULL default '1',
+	 weight int(11) unsigned NOT NULL default '0',
 	 publtime int(11) unsigned NOT NULL default '0',
 	 exptime int(11) unsigned NOT NULL default '0',
 	 archive tinyint(1) unsigned NOT NULL default '0',
@@ -180,6 +182,7 @@ $sql_create_module[] = "CREATE TABLE IF NOT EXISTS " . $db_config['prefix'] . "_
 	 bodyhtml longtext NOT NULL,
 	 sourcetext varchar(255) default '',
 	 imgposition tinyint(1) NOT NULL default '1',
+	 layout_func varchar(100) DEFAULT '',
 	 copyright tinyint(1) NOT NULL default '0',
 	 allowed_send tinyint(1) NOT NULL default '0',
 	 allowed_print tinyint(1) NOT NULL default '0',
@@ -276,6 +279,7 @@ $sql_create_module[] = "INSERT INTO " . NV_CONFIG_GLOBALTABLE . " (lang, module,
 $sql_create_module[] = "INSERT INTO " . NV_CONFIG_GLOBALTABLE . " (lang, module, config_name, config_value) VALUES ('" . $lang . "', '" . $module_name . "', 'structure_upload', 'Ym')";
 $sql_create_module[] = "INSERT INTO " . NV_CONFIG_GLOBALTABLE . " (lang, module, config_name, config_value) VALUES ('" . $lang . "', '" . $module_name . "', 'imgposition', '2')";
 $sql_create_module[] = "INSERT INTO " . NV_CONFIG_GLOBALTABLE . " (lang, module, config_name, config_value) VALUES ('" . $lang . "', '" . $module_name . "', 'htmlhometext', '0')";
+$sql_create_module[] = "INSERT INTO " . NV_CONFIG_GLOBALTABLE . " (lang, module, config_name, config_value) VALUES ('" . $lang . "', '" . $module_name . "', 'order_articles', '1')";
 
 // Cau hinh elasticseach
 $sql_create_module[] = "INSERT INTO " . NV_CONFIG_GLOBALTABLE . " (lang, module, config_name, config_value) VALUES ('" . $lang . "', '" . $module_name . "', 'elas_use', '0')";
@@ -305,3 +309,9 @@ $sql_create_module[] = "INSERT INTO " . NV_CONFIG_GLOBALTABLE . " (lang, module,
 $sql_create_module[] = "INSERT INTO " . NV_CONFIG_GLOBALTABLE . " (lang, module, config_name, config_value) VALUES ('" . $lang . "', '" . $module_name . "', 'captcha', '1')";
 $sql_create_module[] = "INSERT INTO " . NV_CONFIG_GLOBALTABLE . " (lang, module, config_name, config_value) VALUES ('" . $lang . "', '" . $module_name . "', 'perpagecomm', '5')";
 $sql_create_module[] = "INSERT INTO " . NV_CONFIG_GLOBALTABLE . " (lang, module, config_name, config_value) VALUES ('" . $lang . "', '" . $module_name . "', 'timeoutcomm', '360')";
+$sql_create_module[] = "INSERT INTO " . NV_CONFIG_GLOBALTABLE . " (lang, module, config_name, config_value) VALUES ('" . $lang . "', '" . $module_name . "', 'allowattachcomm', '0')";
+$sql_create_module[] = "INSERT INTO " . NV_CONFIG_GLOBALTABLE . " (lang, module, config_name, config_value) VALUES ('" . $lang . "', '" . $module_name . "', 'alloweditorcomm', '0')";
+
+// Cau hinh dang bai ngoai trang
+$sql_create_module[] = "INSERT INTO " . NV_CONFIG_GLOBALTABLE . " (lang, module, config_name, config_value) VALUES ('" . $lang . "', '" . $module_name . "', 'frontend_edit_alias', '0')";
+$sql_create_module[] = "INSERT INTO " . NV_CONFIG_GLOBALTABLE . " (lang, module, config_name, config_value) VALUES ('" . $lang . "', '" . $module_name . "', 'frontend_edit_layout', '1')";

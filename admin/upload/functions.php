@@ -2,7 +2,7 @@
 
 /**
  * @Project NUKEVIET 4.x
- * @Author VINADES.,JSC (contact@vinades.vn)
+ * @Author VINADES.,JSC <contact@vinades.vn>
  * @Copyright (C) 2014 VINADES.,JSC. All rights reserved
  * @License GNU/GPL version 2 or any later version
  * @Createdate 12/31/2009 2:29
@@ -19,6 +19,12 @@ $menu_top = array(
 );
 
 define('NV_IS_FILE_ADMIN', true);
+
+//Document
+$array_url_instruction['main'] = 'https://wiki.nukeviet.vn/nukeviet4:admin:upload';
+$array_url_instruction['thumbconfig'] = 'https://wiki.nukeviet.vn/nukeviet4:admin:upload:thumbconfig';
+$array_url_instruction['config'] = 'https://wiki.nukeviet.vn/nukeviet4:admin:upload:config';
+$array_url_instruction['uploadconfig'] = 'https://wiki.nukeviet.vn/nukeviet4:admin:upload:uploadconfig';
 
 $allow_func = array( 'main', 'imglist', 'delimg', 'createimg', 'dlimg', 'renameimg', 'moveimg', 'folderlist', 'delfolder', 'renamefolder', 'createfolder', 'upload', 'addlogo', 'cropimg', 'rotateimg', 'download' );
 
@@ -85,7 +91,7 @@ function nv_check_allow_upload_dir($dir)
         if ($admin_info['allow_modify_subdirectories'] and ! in_array($dir, $allow_upload_dir)) {
             $level['rename_dir'] = true;
             $level['delete_dir'] = true;
-            
+
             // Khong doi ten, xoa thu muc upload cua module
             if (isset($site_mods[$mod_name]) and $dir == NV_UPLOADS_DIR.'/'.$mod_name) {
                 unset($level['rename_dir'], $level['delete_dir']);
@@ -149,8 +155,6 @@ function nv_check_allow_upload_dir($dir)
  */
 function nv_check_path_upload($path)
 {
-    global $allow_upload_dir, $global_config;
-
     $path = htmlspecialchars(trim($path), ENT_QUOTES);
     $path = rtrim($path, '/');
     if (empty($path)) {
@@ -179,10 +183,10 @@ function nv_check_path_upload($path)
 function nv_get_viewImage($fileName, $refresh = 0)
 {
     global $array_thumb_config;
-    
+
     if (preg_match('/^' . nv_preg_quote(NV_UPLOADS_DIR) . '\/(([a-z0-9\-\_\/]+\/)*([a-z0-9\-\_\.]+)(\.(gif|jpg|jpeg|png|bmp|ico)))$/i', $fileName, $m)) {
         $viewFile = NV_FILES_DIR . '/' . $m[1];
-        
+
         if (file_exists(NV_ROOTDIR . '/' . $viewFile)) {
             if ($refresh) {
                 @nv_deletefile(NV_ROOTDIR . '/' . $viewFile);
@@ -195,7 +199,7 @@ function nv_get_viewImage($fileName, $refresh = 0)
                 );
             }
         }
-        
+
         $m[2] = rtrim($m[2], '/');
         if (isset($array_thumb_config[NV_UPLOADS_DIR . '/' . $m[2]])) {
             $thumb_config = $array_thumb_config[NV_UPLOADS_DIR . '/' . $m[2]];
@@ -211,7 +215,7 @@ function nv_get_viewImage($fileName, $refresh = 0)
                 }
             }
         }
-        
+
         $viewDir = NV_FILES_DIR;
         if (!empty($m[2])) {
             if (!is_dir(NV_ROOTDIR . '/' . $m[2])) {
@@ -231,7 +235,7 @@ function nv_get_viewImage($fileName, $refresh = 0)
             }
         }
         $image = new NukeViet\Files\Image(NV_ROOTDIR . '/' . $fileName, NV_MAX_WIDTH, NV_MAX_HEIGHT);
-        if ($thumb_config['thumb_type'] == 4) {
+        if ($thumb_config['thumb_type'] == 4 || $thumb_config['thumb_type'] == 5) {
             $thumb_width = $thumb_config['thumb_width'];
             $thumb_height = $thumb_config['thumb_height'];
             $maxwh = max($thumb_width, $thumb_height);
@@ -243,10 +247,14 @@ function nv_get_viewImage($fileName, $refresh = 0)
                 $thumb_config['thumb_height'] = 0;
             }
         }
+
         if ($image->fileinfo['width'] > $thumb_config['thumb_width'] or $image->fileinfo['height'] > $thumb_config['thumb_height']) {
             $image->resizeXY($thumb_config['thumb_width'], $thumb_config['thumb_height']);
             if ($thumb_config['thumb_type'] == 4) {
                 $image->cropFromCenter($thumb_width, $thumb_height);
+            }
+            else if($thumb_config['thumb_type'] == 5) {
+            	$image->cropFromTop($thumb_width, $thumb_height);
             }
             $image->save(NV_ROOTDIR . '/' . $viewDir, $m[3] . $m[4], $thumb_config['thumb_quality']);
             $create_Image_info = $image->create_Image_info;
@@ -270,7 +278,7 @@ function nv_get_viewImage($fileName, $refresh = 0)
         } else {
             return false;
         }
-    
+
     } else {
         $size = @getimagesize(NV_ROOTDIR . '/' . $fileName);
         return array(
@@ -324,7 +332,7 @@ function nv_getFileInfo($pathimg, $file)
         $info['srcheight'] = intval($size[1]);
         $info['size'] = intval($size[0]) . '|' . intval($size[1]);
 
-        if (preg_match('/^' . nv_preg_quote(NV_UPLOADS_DIR) . '\/([a-z0-9\-\_\.\/]+)$/i', $pathimg . '/' . $file, $m)) {
+        if (preg_match('/^' . nv_preg_quote(NV_UPLOADS_DIR) . '\/([a-z0-9\-\_\.\/]+)$/i', $pathimg . '/' . $file)) {
             if (($thub_src = nv_get_viewImage($pathimg . '/' . $file)) !== false) {
                 $info['src'] = $thub_src[0];
                 $info['srcwidth'] = $thub_src[1];
@@ -379,7 +387,8 @@ function nv_getFileInfo($pathimg, $file)
  */
 function nv_filesListRefresh($pathimg)
 {
-    global $array_hidefolders, $admin_info, $db_config, $module_data, $db, $array_dirname;
+    global $array_hidefolders, $admin_info, $db, $array_dirname;
+
     $results = array();
     $did = $array_dirname[$pathimg];
     if (is_dir(NV_ROOTDIR . '/' . $pathimg)) {
@@ -394,7 +403,7 @@ function nv_filesListRefresh($pathimg)
                     continue;
                 }
 
-                if (preg_match('/([a-zA-Z0-9\.\-\_\\s\(\)]+)\.([a-zA-Z0-9]+)$/', $title, $m)) {
+                if (preg_match('/([a-zA-Z0-9\.\-\_\\s\(\)]+)\.([a-zA-Z0-9]+)$/', $title)) {
                     $info = nv_getFileInfo($pathimg, $title);
                     $info['did'] = $did;
                     $info['title'] = $title;
@@ -429,8 +438,8 @@ function nv_filesListRefresh($pathimg)
 
             if (! empty($results)) {
                 // Xóa CSDL file không còn tồn tại
-                foreach ($results as $title => $value) {
-                    $db->query("DELETE FROM " . NV_UPLOAD_GLOBALTABLE . "_file WHERE did = " . $did . " AND title=" . $db->quote($title));
+                foreach ($results as $_row) {
+                    $db->query("DELETE FROM " . NV_UPLOAD_GLOBALTABLE . "_file WHERE did = " . $did . " AND title=" . $db->quote($_row['title']));
                 }
             }
             $db->query('UPDATE ' . NV_UPLOAD_GLOBALTABLE . '_dir SET time = ' . NV_CURRENTTIME . ' WHERE did = ' . $did);

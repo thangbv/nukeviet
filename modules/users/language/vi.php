@@ -2,7 +2,7 @@
 
 /**
  * @Project NUKEVIET 4.x
- * @Author VINADES.,JSC (contact@vinades.vn)
+ * @Author VINADES.,JSC <contact@vinades.vn>
  * @Copyright (C) 2014 VINADES.,JSC. All rights reserved
  * @Language Tiếng Việt
  * @License CC BY-SA (http://creativecommons.org/licenses/by-sa/4.0/)
@@ -13,7 +13,7 @@ if (!defined('NV_MAINFILE')) {
     die('Stop!!!');
 }
 
-$lang_translator['author'] = 'VINADES.,JSC (contact@vinades.vn)';
+$lang_translator['author'] = 'VINADES.,JSC <contact@vinades.vn>';
 $lang_translator['createdate'] = '04/03/2010, 15:22';
 $lang_translator['copyright'] = '@Copyright (C) 2012 VINADES.,JSC. All rights reserved';
 $lang_translator['info'] = '';
@@ -36,6 +36,7 @@ $lang_module['male'] = 'Nam';
 $lang_module['female'] = 'Nữ';
 $lang_module['na'] = 'N/A';
 $lang_module['account'] = 'Tên đăng nhập';
+$lang_module['sig'] = 'Chữ ký';
 $lang_module['email'] = 'Email';
 $lang_module['check'] = 'Kiểm tra';
 $lang_module['page'] = 'Trang %d';
@@ -46,7 +47,7 @@ $lang_module['question'] = 'Câu hỏi bảo mật';
 $lang_module['select_question'] = 'Hãy lựa chọn câu hỏi';
 $lang_module['your_question'] = 'Hoặc tự điền câu hỏi bảo mật riêng';
 $lang_module['answer_question'] = 'Câu trả lời của bạn';
-$lang_module['answer_your_question'] = 'Trả lời câu hỏi';
+$lang_module['answer'] = 'Trả lời câu hỏi';
 $lang_module['captcha'] = 'Mã bảo mật';
 $lang_module['retype_captcha'] = 'Nhập vào mã xác nhận';
 $lang_module['usage_terms'] = 'Quy định đăng ký thành viên';
@@ -78,6 +79,7 @@ $lang_module['avatar_news_copy_error'] = 'Không thể lưu hình đại diện'
 $lang_module['birthday'] = 'Ngày tháng năm sinh';
 $lang_module['showmail'] = 'Hiển thị email';
 $lang_module['login'] = 'Thành viên đăng nhập';
+$lang_module['login_with'] = 'Đăng nhập với';
 $lang_module['login_submit'] = 'Đăng nhập';
 $lang_module['user_info'] = 'Thông tin thành viên';
 $lang_module['regdate'] = 'Ngày tham gia';
@@ -114,8 +116,8 @@ $lang_module['account_active_mess'] = 'Tài khoản của bạn đã được t�
 $lang_module['account_active_mess_error_mail'] = 'Tài khoản của bạn đang ở trạng thái chờ kích hoạt. Rất tiếc là đã có lỗi xảy ra trong quá trình gửi thông tin kích hoạt đến địa chỉ e-mail mà bạn vừa cung cấp. Vui lòng liên hệ đến Quản trị Website để được hỗ trợ.';
 $lang_module['account_active_ok'] = 'Kích hoạt tài khoản thành công';
 $lang_module['account_active_error'] = 'Lỗi: Kích hoạt tài khoản không thành công, bạn vui lòng kiểm tra lại đường dẫn hoặc thời gian hiệu lực của link kích hoạt';
-$lang_module['editinfo_pagetitle'] = 'Thiếp lập tài khoản';
-$lang_module['editinfo'] = 'Thiếp lập tài khoản';
+$lang_module['editinfo_pagetitle'] = 'Thiết lập tài khoản';
+$lang_module['editinfo'] = 'Thiết lập tài khoản';
 $lang_module['editinfo_confirm'] = 'Chấp nhận';
 $lang_module['editinfo_password_notice'] = 'Để trống 2 ô mật khẩu nếu không muốn đổi mật khẩu mới ';
 $lang_module['lostactive_pagetitle'] = 'Lấy lại link kích hoạt';
@@ -134,9 +136,10 @@ $lang_module['pass_new_re'] = 'Nhập lại mật khẩu mới';
 $lang_module['change_pass_ok'] = 'Thay đổi mật khẩu thành công';
 $lang_module['lostpass_email_subject'] = 'Hướng dẫn khôi phục mật khẩu';
 $lang_module['lostpass_email_content'] = 'Xin chào %1$s,<br /><br />Bạn vừa gửi đề nghị thay đổi mật khẩu đăng nhập tài khoản cá nhân tại website %2$s. Để thay đổi mật khẩu, bạn cần nhập mã xác minh dưới đây vào ô tương ứng tại khu vực thay đổi mật khẩu.<br /><br />Mã xác minh: <strong>%3$s</strong></a><br /><br />Mã này chỉ được sử dụng một lần và trước thời hạn: %4$s.<br /><br />Đây là thư tự động được gửi đến hòm thư điện tử của bạn từ website %2$s. Nếu bạn không hiểu gì về nội dung bức thư này, đơn giản hãy xóa nó đi.<br /><br />Quản trị site';
-$lang_module['lostpass_content_mess'] = 'Thư thông báo mã xác minh đã được gửi tới email của bạn. Hãy chép mã đó vào ô này.';
+$lang_module['lostpass_content_mess'] = 'Thư thông báo mã xác minh đã được gửi tới email %1$s của bạn. Hãy chép mã đó vào ô này.';
 $lang_module['lostpass_active_error'] = 'Mã xác minh không khớp!';
 $lang_module['lostpass_newpass_mess'] = 'Hãy khai báo mật khẩu mới vào ô này.';
+$lang_module['lostpass_sendmail_error'] = 'Hiện tại hệ thống không thể gửi email được do đó bạn tạm thời không thể lấy lại mật khẩu, vui lòng liên hệ với quản trị site để được hỗ trợ. Thành thật xin lỗi về sự bất tiện này!';
 $lang_module['logout_title'] = 'Thoát';
 $lang_module['edit_info_title'] = 'Sửa';
 $lang_module['img_size_title'] = 'Hình đại diện';
@@ -229,6 +232,7 @@ $lang_module['field_min_max_error'] = '%1$s cần nhập từ %2$s đến %3$s k
 $lang_module['field_match_type_required'] = '%s bắt buộc nhập';
 $lang_module['errorMessage'] = 'Thông báo từ hệ thống';
 $lang_module['login_info'] = 'Hãy đăng nhập thành viên để trải nghiệm đầy đủ các tiện ích trên site';
+$lang_module['old_min_user_error'] = 'Tuổi của bạn dưới %s nên chưa đủ tuổi đăng ký';
 
 $lang_module['edit_basic'] = 'Cơ bản';
 $lang_module['edit_others'] = 'Khác';

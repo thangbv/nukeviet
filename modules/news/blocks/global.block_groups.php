@@ -2,7 +2,7 @@
 
 /**
  * @Project NUKEVIET 4.x
- * @Author VINADES.,JSC (contact@vinades.vn)
+ * @Author VINADES.,JSC <contact@vinades.vn>
  * @Copyright (C) 2014 VINADES.,JSC. All rights reserved
  * @License GNU/GPL version 2 or any later version
  * @Createdate Sat, 10 Dec 2011 06:46:54 GMT
@@ -79,7 +79,7 @@ if (! nv_function_exists('nv_block_news_groups')) {
 
     function nv_block_news_groups($block_config)
     {
-        global $module_array_cat, $module_info, $site_mods, $module_config, $global_config, $nv_Cache, $db;
+        global $module_array_cat, $site_mods, $module_config, $global_config, $nv_Cache, $db;
         $module = $block_config['module'];
         $show_no_image = $module_config[$module]['show_no_image'];
         $blockwidth = $module_config[$module]['blockwidth'];
@@ -118,20 +118,20 @@ if (! nv_function_exists('nv_block_news_groups')) {
                 }
 
                 $l['blockwidth'] = $blockwidth;
-                
+
                 $l['hometext_clean'] = strip_tags($l['hometext']);
                 $l['hometext_clean'] = nv_clean60($l['hometext_clean'], $block_config['tooltip_length'], true);
 
                 if (! $block_config['showtooltip']) {
                     $xtpl->assign('TITLE', 'title="' . $l['title'] . '"');
                 }
-                
+
                 $l['title_clean'] = nv_clean60($l['title'], $block_config['title_length']);
-                
+
                 if ($l['external_link']) {
                     $l['target_blank'] = 'target="_blank"';
                 }
-                
+
                 $xtpl->assign('ROW', $l);
                 if (! empty($l['thumb'])) {
                     $xtpl->parse('main.loop.img');
@@ -158,7 +158,7 @@ if (defined('NV_SYSTEM')) {
             unset($module_array_cat[0]);
         } else {
             $module_array_cat = array();
-            $sql = 'SELECT catid, parentid, title, alias, viewcat, subcatid, numlinks, description, inhome, keywords, groups_view FROM ' . NV_PREFIXLANG . '_' . $site_mods[$module]['module_data'] . '_cat ORDER BY sort ASC';
+            $sql = 'SELECT catid, parentid, title, alias, viewcat, subcatid, numlinks, description, keywords, groups_view, status FROM ' . NV_PREFIXLANG . '_' . $site_mods[$module]['module_data'] . '_cat ORDER BY sort ASC';
             $list = $nv_Cache->db($sql, 'catid', $module);
             if(!empty($list))
             {
