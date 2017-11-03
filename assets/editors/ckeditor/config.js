@@ -7,7 +7,7 @@ CKEDITOR.editorConfig = function( config ) {
     config.enterMode = CKEDITOR.ENTER_BR;
 	config.language = nv_lang_interface;
 	config.allowedContent = true;
-	config.extraPlugins = 'video,eqneditor,switchbar,tbvdownload,cleanlink,googledocs';
+	config.extraPlugins = 'video,eqneditor,switchbar,tbvdownload,cleanlink,googledocs,ckeditor_wiris,svgedit';
 	config.entities = false;
 	config.image2_altRequired = true;
 	config.youtube_width = '640';
@@ -39,7 +39,7 @@ CKEDITOR.editorConfig = function( config ) {
 	[
 		{ name: 'clipboard', items : [ 'Cut','Copy','Paste','PasteText','PasteFromWord','-','Undo','Redo' ] },
 		{ name: 'insert', items : [ 'Image','Flash','Table','HorizontalRule','Smiley','SpecialChar','PageBreak','Iframe' ] },
-		{ name: 'links', items : [ 'Link','Unlink','Anchor' ] },
+		{ name: 'links', items : [ 'Link','Unlink','Anchor', 'ckeditor_wiris', 'svgedit' ] },
 		'/',
 		{ name: 'basicstyles', items : [ 'Bold','Italic','Strike','-','RemoveFormat' ] },
 		{ name: 'paragraph', items : [ 'NumberedList','BulletedList','-','Outdent','Indent','-','Blockquote' ] },

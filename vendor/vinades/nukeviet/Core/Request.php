@@ -520,7 +520,7 @@ class Request
                     continue;
                 }
 
-                $attrSubSet[1] = preg_replace_callback('/\#([0-9ABCDEFabcdef]{3,6})[\;]*/', array( $this, 'color_hex2rgb_callback' ), $attrSubSet[1]);
+                //$attrSubSet[1] = preg_replace_callback('/\#([0-9ABCDEFabcdef]{3,6})[\;]*/', array( $this, 'color_hex2rgb_callback' ), $attrSubSet[1]);
             } elseif ($attrSubSet[1] !== '0') {
                 $attrSubSet[1] = $attrSubSet[0];
             }

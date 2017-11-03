@@ -1,0 +1,67 @@
+@font-face {
+    font-family: 'Arvo';
+    src: url('../fonts/arvo-italic-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: italic;
+}
+@font-face {
+    font-family: 'Arvo';
+    src: url('../fonts/arvo-regular-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Euphoria';
+    src: url('../fonts/euphoriascript-regular-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Shadows Into Light';
+    src: url('../fonts/shadowsintolight-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Simonetta';
+    src: url('../fonts/simonetta-black-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Simonetta';
+    src: url('../fonts/simonetta-blackitalic-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Simonetta';
+    src: url('../fonts/simonetta-regular-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Junction';
+    src: url('../fonts/Junction-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'League Gothic';
+    src: url('../fonts/League_Gothic-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Fanwood';
+    src: url('../fonts/fanwood-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Fanwood';
+    src: url('../fonts/fanwood_italic-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: italic;
+}
